@@ -1,0 +1,117 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+
+export type AuthState = { error: string | null; success?: boolean }
+
+export async function login(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  if (!email || !password) {
+    return { error: 'Email y contraseña son requeridos' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+  if (error) {
+    if (error.message === 'Email not confirmed') {
+      return { error: 'Debes confirmar tu email antes de iniciar sesión' }
+    }
+    return { error: 'Email o contraseña incorrectos' }
+  }
+
+  redirect('/dashboard')
+}
+
+export async function register(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const fullName = formData.get('fullName') as string
+
+  if (!email || !password || !fullName) {
+    return { error: 'Todos los campos son requeridos' }
+  }
+
+  if (password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: fullName },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+    },
+  })
+
+  if (error) {
+    if (error.message.includes('already registered')) {
+      return { error: 'Este email ya está registrado' }
+    }
+    if (error.message.toLowerCase().includes('rate limit') || error.message.includes('over_email_send_rate_limit')) {
+      return { error: 'Demasiados intentos de registro. Espera unos minutos e intenta de nuevo.' }
+    }
+    return { error: error.message }
+  }
+
+  // Sign out immediately — user must confirm their email before logging in
+  await supabase.auth.signOut()
+
+  return { error: null, success: true }
+}
+
+export async function forgotPassword(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = formData.get('email') as string
+
+  if (!email) {
+    return { error: 'El email es requerido' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { error: null, success: true }
+}
+
+export async function resetPassword(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (!password || !confirmPassword) {
+    return { error: 'Todos los campos son requeridos' }
+  }
+
+  if (password !== confirmPassword) {
+    return { error: 'Las contraseñas no coinciden' }
+  }
+
+  if (password.length < 6) {
+    return { error: 'La contraseña debe tener al menos 6 caracteres' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  redirect('/dashboard')
+}
+
+export async function logout(): Promise<void> {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  redirect('/login')
+}
