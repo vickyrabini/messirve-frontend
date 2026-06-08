@@ -11,6 +11,11 @@ const csp = [
 ].join('; ')
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   headers: async () => [
     {
       source: '/(.*)',

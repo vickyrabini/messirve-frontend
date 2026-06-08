@@ -54,9 +54,9 @@ export default function TermsAndConditionsPage() {
 
         <SectionTitle number="1" title="Aceptación de los Términos" />
         <P>
-          Al descargar, registrarte o utilizar la aplicación MESSIRVE (en adelante, "la App" o "la Plataforma"),
+          {`Al descargar, registrarte o utilizar la aplicación MESSIRVE (en adelante, "la App" o "la Plataforma"),
           aceptás íntegramente estos Términos y Condiciones de Uso (en adelante, "los Términos"), así como nuestra
-          Política de Privacidad. Estos Términos constituyen un contrato legalmente vinculante entre vos y MESSIRVE.
+          Política de Privacidad. Estos Términos constituyen un contrato legalmente vinculante entre vos y MESSIRVE.`}
         </P>
         <P>
           Si accedés a la App en nombre de una empresa u organización, declarás tener autorización para vincular a

@@ -64,6 +64,12 @@ export async function register(_state: AuthState, formData: FormData): Promise<A
   })
 
   if (error) {
+    console.log('[register] supabase signUp error:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name,
+    })
     if (error.message.includes('already registered')) {
       return { error: 'Este email ya está registrado' }
     }
