@@ -158,6 +158,7 @@ export async function approveClientRequest(formData: FormData): Promise<void> {
   await admin.from('profiles').update({ role: 'client' }).eq('id', userId)
 
   revalidatePath('/admin/requests')
+  revalidatePath(`/admin/requests/${requestId}`)
 }
 
 export async function rejectClientRequest(formData: FormData): Promise<void> {
@@ -175,4 +176,5 @@ export async function rejectClientRequest(formData: FormData): Promise<void> {
     .eq('id', requestId)
 
   revalidatePath('/admin/requests')
+  revalidatePath(`/admin/requests/${requestId}`)
 }

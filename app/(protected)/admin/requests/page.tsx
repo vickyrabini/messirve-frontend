@@ -1,5 +1,5 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { approveClientRequest, rejectClientRequest } from '@/app/actions/admin'
 import { Pagination } from '../pagination'
 import type { ClientRequestStatus } from '@/types/database'
 
@@ -9,7 +9,6 @@ type RequestRow = {
   id: string
   user_id: string
   status: ClientRequestStatus
-  message: string | null
   created_at: string
 }
 
@@ -33,7 +32,7 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
   const admin = createAdminClient()
   const { data: requests, count } = await admin
     .from('client_requests')
-    .select('id, user_id, status, message, created_at', { count: 'exact' })
+    .select('id, user_id, status, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to)
     .returns<RequestRow[]>()
@@ -54,61 +53,40 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
         <h1 className="font-brand text-2xl text-ink">Gestión de clientes</h1>
         <p className="mt-1 text-sm text-muted">Aprobá o rechazá las solicitudes para convertirse en cliente</p>
 
-        <div className="mt-8 overflow-hidden rounded-2xl border border-gris/30 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
-              <tr>
-                <th className="px-5 py-3 font-medium">Usuario</th>
-                <th className="px-5 py-3 font-medium">Email</th>
-                <th className="px-5 py-3 font-medium">Mensaje</th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {(requests ?? []).map((r) => (
-                <tr key={r.id} className="border-b border-gris/20 last:border-0">
-                  <td className="px-5 py-3 font-medium text-ink">{nameById.get(r.user_id) ?? '—'}</td>
-                  <td className="px-5 py-3 text-muted">{emailById.get(r.user_id) ?? '—'}</td>
-                  <td className="max-w-xs truncate px-5 py-3 text-muted" title={r.message ?? undefined}>
-                    {r.message ?? '—'}
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[r.status]}`}>
-                      {statusLabel[r.status]}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    {r.status === 'pending' ? (
-                      <div className="flex justify-end gap-2">
-                        <form action={approveClientRequest}>
-                          <input type="hidden" name="requestId" value={r.id} />
-                          <input type="hidden" name="userId" value={r.user_id} />
-                          <button
-                            type="submit"
-                            className="cursor-pointer rounded-lg border border-celeste/40 px-3 py-1.5 text-xs font-semibold text-celeste-deep transition-colors hover:border-celeste hover:bg-celeste/10"
-                          >
-                            Aprobar
-                          </button>
-                        </form>
-                        <form action={rejectClientRequest}>
-                          <input type="hidden" name="requestId" value={r.id} />
-                          <button
-                            type="submit"
-                            className="cursor-pointer rounded-lg border border-gris/40 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-red-300 hover:text-red-500"
-                          >
-                            Rechazar
-                          </button>
-                        </form>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted">—</span>
-                    )}
-                  </td>
+        <div className="mt-8 rounded-2xl border border-gris/30 bg-white">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Usuario</th>
+                  <th className="px-5 py-3 font-medium">Email</th>
+                  <th className="px-5 py-3 font-medium">Estado</th>
+                  <th className="px-5 py-3 font-medium"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(requests ?? []).map((r) => (
+                  <tr key={r.id} className="border-b border-gris/20 last:border-0">
+                    <td className="px-5 py-3 font-medium text-ink">{nameById.get(r.user_id) ?? '—'}</td>
+                    <td className="px-5 py-3 text-muted">{emailById.get(r.user_id) ?? '—'}</td>
+                    <td className="px-5 py-3">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[r.status]}`}>
+                        {statusLabel[r.status]}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <Link
+                        href={`/admin/requests/${r.id}`}
+                        className="rounded-lg border border-gris/40 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                      >
+                        Ver solicitud
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {(requests ?? []).length === 0 && (
             <p className="px-5 py-8 text-center text-sm text-muted">No hay solicitudes cargadas</p>
