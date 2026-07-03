@@ -7,6 +7,7 @@ const links = [
   { href: '/admin', label: 'Panel' },
   { href: '/admin/users', label: 'Usuarios' },
   { href: '/admin/services', label: 'Servicios' },
+  { href: '/admin/requests', label: 'Solicitudes' },
 ]
 
 export function AdminNav() {
