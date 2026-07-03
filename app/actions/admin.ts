@@ -137,3 +137,42 @@ export async function toggleServiceActive(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/services')
 }
+
+export async function approveClientRequest(formData: FormData): Promise<void> {
+  // Verify the CALLER is an admin — server-side, never trust the route gate alone
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') return
+
+  const requestId = formData.get('requestId') as string
+  const userId = formData.get('userId') as string
+  if (!requestId || !userId) return
+
+  const admin = createAdminClient()
+
+  const { error } = await admin
+    .from('client_requests')
+    .update({ status: 'approved', reviewed_at: new Date().toISOString(), reviewed_by: caller.id })
+    .eq('id', requestId)
+  if (error) return
+
+  await admin.from('profiles').update({ role: 'client' }).eq('id', userId)
+
+  revalidatePath('/admin/requests')
+}
+
+export async function rejectClientRequest(formData: FormData): Promise<void> {
+  // Verify the CALLER is an admin — server-side, never trust the route gate alone
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') return
+
+  const requestId = formData.get('requestId') as string
+  if (!requestId) return
+
+  const admin = createAdminClient()
+  await admin
+    .from('client_requests')
+    .update({ status: 'rejected', reviewed_at: new Date().toISOString(), reviewed_by: caller.id })
+    .eq('id', requestId)
+
+  revalidatePath('/admin/requests')
+}

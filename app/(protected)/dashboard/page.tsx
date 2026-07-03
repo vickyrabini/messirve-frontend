@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/profile'
 import { logout } from '@/app/actions/auth'
 import { ServiceCard } from '@/components/service-card'
+import { ClientRequestCard } from './client-request-card'
 import type { ServiceWithStats } from '@/types/database'
 
 export default async function DashboardPage() {
@@ -13,12 +14,15 @@ export default async function DashboardPage() {
   const profile = await getCurrentProfile()
   const fullName = user?.user_metadata?.full_name as string | undefined
 
-  // 1. Own service (clients only) + liked service ids — parallel
-  const [{ data: ownService }, { data: likes }] = await Promise.all([
+  // 1. Own service (clients only) + liked service ids + own client request (users only) — parallel
+  const [{ data: ownService }, { data: likes }, { data: clientRequest }] = await Promise.all([
     profile?.role === 'client'
       ? supabase.from('services').select('id').eq('user_id', user!.id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from('service_likes').select('service_id').eq('user_id', user!.id),
+    profile?.role === 'user'
+      ? supabase.from('client_requests').select('status, message').eq('user_id', user!.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
   const serviceIds = (likes ?? []).map((l) => l.service_id)
 
@@ -89,6 +93,8 @@ export default async function DashboardPage() {
             </Link>
           )}
         </div>
+
+        {profile?.role === 'user' && <ClientRequestCard request={clientRequest} />}
 
         <section>
           <h3 className="font-brand text-xl text-ink">Mis favoritos</h3>

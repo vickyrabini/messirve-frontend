@@ -102,6 +102,15 @@ export async function forgotPassword(_state: AuthState, formData: FormData): Pro
   })
 
   if (error) {
+    console.log('[forgotPassword] supabase resetPasswordForEmail error:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name,
+    })
+    if (error.message.toLowerCase().includes('rate limit') || error.message.includes('over_email_send_rate_limit')) {
+      return { error: 'Demasiados intentos. Espera unos minutos e intenta de nuevo.' }
+    }
     return { error: 'No se pudo enviar el email. Intentá de nuevo.' }
   }
 
