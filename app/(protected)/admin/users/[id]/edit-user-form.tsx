@@ -54,7 +54,11 @@ export function EditUserForm({ userId, email, fullName, role }: { userId: string
         />
       </div>
 
-      {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>}
+      {state?.error && (
+        <p className="rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: '#FBEAE7', color: '#A63B24' }}>
+          {state.error}
+        </p>
+      )}
       {state?.success && (
         <p className="rounded-lg bg-celeste/10 px-3 py-2 text-sm font-semibold text-celeste-deep">Usuario actualizado correctamente.</p>
       )}
@@ -62,7 +66,7 @@ export function EditUserForm({ userId, email, fullName, role }: { userId: string
       <button
         type="submit"
         disabled={isPending}
-        className="w-full cursor-pointer rounded-lg bg-celeste px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60"
+        className="w-full cursor-pointer rounded-full bg-celeste px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark disabled:opacity-60"
       >
         {isPending ? 'Guardando...' : 'Guardar cambios'}
       </button>

@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
-import { Madimi_One, Open_Sans } from 'next/font/google'
+import { Anton, Instrument_Sans } from 'next/font/google'
 import './globals.css'
 
-const madimi = Madimi_One({
+const anton = Anton({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-madimi',
   display: 'swap',
 })
 
-const openSans = Open_Sans({
+const instrumentSans = Instrument_Sans({
+  weight: ['400', '600'],
   subsets: ['latin'],
   variable: '--font-open-sans',
   display: 'swap',
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${madimi.variable} ${openSans.variable} h-full antialiased`}>
+    <html lang="es" className={`${anton.variable} ${instrumentSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   )

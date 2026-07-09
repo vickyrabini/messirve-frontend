@@ -28,7 +28,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
   return (
     <div className="min-h-screen bg-cream">
       <main className="mx-auto max-w-2xl px-6 py-12">
-        <h1 className="font-brand text-2xl text-ink">Editar servicio</h1>
+        <h1 className="font-brand uppercase text-2xl text-ink">Editar servicio</h1>
         <p className="mt-1 text-sm text-muted">
           Los cambios quedarán pendientes de revisión por el equipo de Messirve antes de ser visibles.
         </p>

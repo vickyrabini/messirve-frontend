@@ -29,10 +29,9 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE))
 
   return (
-    <div className="min-h-screen bg-cream">
-      <main className="mx-auto max-w-4xl px-6 py-12">
-        <h1 className="font-brand text-2xl text-ink">Gestionar servicios</h1>
-        <p className="mt-1 text-sm text-muted">Activá los servicios pendientes de revisión o desactivá los publicados</p>
+    <div className="mx-auto max-w-4xl px-8 py-10">
+      <h1 className="font-brand uppercase text-2xl text-ink">Gestionar servicios</h1>
+      <p className="mt-1 text-sm text-muted">Activá los servicios pendientes de revisión o desactivá los publicados</p>
 
         <div className="mt-8 overflow-hidden rounded-2xl border border-gris/30 bg-white">
           <table className="w-full text-left text-sm">
@@ -68,7 +67,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
                       <input type="hidden" name="isActive" value={String(s.is_active)} />
                       <button
                         type="submit"
-                        className="cursor-pointer rounded-lg border border-gris/40 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                        className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
                       >
                         {s.is_active ? 'Desactivar' : 'Activar'}
                       </button>
@@ -83,7 +82,6 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
 
           <Pagination page={page} totalPages={totalPages} buildHref={(p) => `/admin/services?page=${p}`} />
         </div>
-      </main>
     </div>
   )
 }

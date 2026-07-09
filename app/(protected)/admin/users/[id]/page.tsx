@@ -17,22 +17,20 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="min-h-screen bg-cream">
-      <main className="mx-auto max-w-md px-6 py-12">
-        <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
-          <span>←</span> Volver a usuarios
-        </Link>
+    <div className="mx-auto max-w-md px-8 py-10">
+      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
+        <span>←</span> Volver a usuarios
+      </Link>
 
-        <h1 className="mt-4 font-brand text-2xl text-ink">Editar usuario</h1>
-        <p className="mt-1 text-sm text-muted">Actualizá el nombre, el rol o la contraseña de la cuenta</p>
+      <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Editar usuario</h1>
+      <p className="mt-1 text-sm text-muted">Actualizá el nombre, el rol o la contraseña de la cuenta</p>
 
-        <EditUserForm
-          userId={id}
-          email={authData.user.email ?? '—'}
-          fullName={profile.full_name ?? ''}
-          role={profile.role}
-        />
-      </main>
+      <EditUserForm
+        userId={id}
+        email={authData.user.email ?? '—'}
+        fullName={profile.full_name ?? ''}
+        role={profile.role}
+      />
     </div>
   )
 }

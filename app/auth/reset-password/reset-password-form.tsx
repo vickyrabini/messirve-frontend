@@ -9,56 +9,48 @@ export default function ResetPasswordForm() {
   const [state, formAction, isPending] = useActionState(resetPassword, initialState)
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">Nueva contraseña</h2>
-      <p className="text-sm text-gray-500 mb-6">Elige una nueva contraseña para tu cuenta.</p>
+    <form action={formAction} noValidate className="space-y-5">
+      <div>
+        <label htmlFor="password" className="mb-1.5 block text-[14px] font-semibold text-ink">
+          Nueva contraseña
+        </label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          placeholder="Mínimo 6 caracteres"
+          className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
+        />
+      </div>
 
-      <form action={formAction} className="space-y-4">
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Nueva contraseña
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={6}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:border-transparent text-gray-700"
-            placeholder="Mínimo 6 caracteres"
-          />
-        </div>
+      <div>
+        <label htmlFor="confirmPassword" className="mb-1.5 block text-[14px] font-semibold text-ink">
+          Repetí la contraseña
+        </label>
+        <input
+          id="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          placeholder="Repetí la contraseña"
+          className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
+        />
+      </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            Confirmar contraseña
-          </label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={6}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:border-transparent text-gray-700"
-            placeholder="Repite la contraseña"
-          />
-        </div>
+      {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-[13px] font-semibold text-red-500">{state.error}</p>}
 
-        {state?.error && (
-          <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{state.error}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full py-2.5 px-4 text-white font-medium rounded-lg transition-opacity disabled:opacity-60 text-sm cursor-pointer"
-          style={{ backgroundColor: '#72B8E6' }}
-        >
-          {isPending ? 'Guardando...' : 'Guardar contraseña'}
-        </button>
-      </form>
-    </div>
+      <button
+        type="submit"
+        disabled={isPending}
+        className="w-full rounded-xl bg-celeste-deep px-6 py-3.5 text-[16px] font-semibold text-white shadow-soft transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+      >
+        {isPending ? 'Guardando...' : 'Guardar y entrar'}
+      </button>
+    </form>
   )
 }

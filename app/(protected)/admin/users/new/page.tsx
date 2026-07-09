@@ -15,18 +15,17 @@ export default function NewClientUserPage() {
   const [state, formAction, isPending] = useActionState(createClientUser, initialState)
 
   return (
-    <div className="min-h-screen bg-cream">
-      <main className="mx-auto max-w-md px-6 py-12">
-        <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
-          <span>←</span> Volver a usuarios
-        </Link>
+    <div className="mx-auto max-w-md px-8 py-10">
+      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
+        <span>←</span> Volver a usuarios
+      </Link>
 
-        <h1 className="mt-4 font-brand text-2xl text-ink">Crear usuario cliente</h1>
-        <p className="mt-1 text-sm text-muted">
-          La cuenta queda lista para iniciar sesión de inmediato, con permiso para publicar servicios.
-        </p>
+      <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Crear usuario cliente</h1>
+      <p className="mt-1 text-sm text-muted">
+        La cuenta queda lista para iniciar sesión de inmediato, con permiso para publicar servicios.
+      </p>
 
-        <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
+      <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
           <div>
             <label htmlFor="fullName" className={labelClass}>
               Nombre completo
@@ -65,7 +64,9 @@ export default function NewClientUserPage() {
           </div>
 
           {state?.error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>
+            <p className="rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: '#FBEAE7', color: '#A63B24' }}>
+              {state.error}
+            </p>
           )}
           {state?.success && (
             <p className="rounded-lg bg-celeste/10 px-3 py-2 text-sm font-semibold text-celeste-deep">
@@ -76,12 +77,11 @@ export default function NewClientUserPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full cursor-pointer rounded-lg bg-celeste px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60"
+            className="w-full cursor-pointer rounded-full bg-celeste px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark disabled:opacity-60"
           >
             {isPending ? 'Creando...' : 'Crear usuario'}
           </button>
         </form>
-      </main>
     </div>
   )
 }
