@@ -4,6 +4,16 @@ import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const CATEGORIAS = [
+  { emoji: '🏠', name: 'Hogar' },
+  { emoji: '🍽️', name: 'Gastronomía' },
+  { emoji: '💊', name: 'Salud & Bienestar' },
+  { emoji: '🎨', name: 'Arte & Entretenimiento' },
+  { emoji: '👗', name: 'Indumentaria & Belleza' },
+  { emoji: '🏨', name: 'Hospedaje para Turistas' },
+  { emoji: '📋', name: 'Asesoría & Gestoría' },
+]
+
 export default function LandingPage() {
   const navShellRef = useRef<HTMLElement>(null)
 
@@ -54,7 +64,7 @@ export default function LandingPage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
 
-    // GSAP animations (only if available and motion is ok)
+    // GSAP parallax (only if available and motion is ok)
     if (reduce) return () => window.removeEventListener('scroll', onScroll)
 
     let cleanupGsap: (() => void) | undefined
@@ -62,16 +72,6 @@ export default function LandingPage() {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
         gsap.registerPlugin(ScrollTrigger)
 
-        // Floating phone
-        const phoneTween = gsap.to('#phone', {
-          y: '+=12',
-          duration: 3,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1,
-        })
-
-        // Parallax on glows and decorative stars
         const parallaxTweens: ReturnType<typeof gsap.to>[] = []
         document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
           const speed = parseFloat(el.getAttribute('data-parallax') || '0.15')
@@ -89,7 +89,6 @@ export default function LandingPage() {
         })
 
         cleanupGsap = () => {
-          phoneTween.kill()
           parallaxTweens.forEach((t) => t.kill())
           ScrollTrigger.getAll().forEach((st) => st.kill())
         }
@@ -116,11 +115,11 @@ export default function LandingPage() {
             </a>
 
             <div className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-ink/80">
-              <a href="#valor" className="link-underline hover:text-ink">
-                Por qué Messirve
-              </a>
               <a href="#como" className="link-underline hover:text-ink">
                 Cómo funciona
+              </a>
+              <a href="#emprendedores" className="link-underline hover:text-ink">
+                Para emprendedores
               </a>
               <a href="#categorias" className="link-underline hover:text-ink">
                 Categorías
@@ -130,15 +129,15 @@ export default function LandingPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/login"
-                className="hidden sm:inline-flex items-center rounded-full px-4 py-2 text-[15px] font-bold text-celeste-deep hover:bg-celeste/10 transition-colors"
+                className="hidden sm:inline-flex items-center rounded-full bg-celeste px-5 py-2.5 text-[15px] font-bold text-white shadow-soft hover:bg-celeste-dark transition-all hover:-translate-y-0.5"
               >
-                Iniciar sesión
+                Ingresar
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center rounded-full bg-celeste px-5 py-2.5 text-[15px] font-bold text-white shadow-soft hover:bg-celeste-dark transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center rounded-full bg-celeste-deep px-5 py-2.5 text-[15px] font-bold text-white shadow-soft hover:bg-[#15212F] transition-all hover:-translate-y-0.5"
               >
-                Registrate
+                Registrarse
               </Link>
             </div>
           </nav>
@@ -146,247 +145,84 @@ export default function LandingPage() {
       </header>
 
       {/* ============ HERO ============ */}
-      <section id="top" className="relative grain overflow-hidden pt-36 pb-20 sm:pt-40 sm:pb-28">
-        {/* Background glows */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div
-            className="float-slow absolute -top-24 -left-24 h-[34rem] w-[34rem] rounded-full bg-celeste/25 blur-3xl"
-            data-parallax="0.18"
-          />
-          <div
-            className="float-slow absolute top-40 -right-32 h-[30rem] w-[30rem] rounded-full bg-dorado/20 blur-3xl"
-            data-parallax="-0.12"
-          />
-        </div>
+      <section id="top" className="relative overflow-hidden bg-celeste pt-36 pb-24 sm:pt-40 sm:pb-28">
+        <div
+          className="float-slow pointer-events-none absolute -right-40 -top-24 h-[34rem] w-[34rem] rounded-full bg-white/10 blur-3xl"
+          data-parallax="0.15"
+        />
 
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-8 items-center">
-          {/* Text column */}
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
           <div data-stagger>
-            <div className="reveal inline-flex items-center gap-2 rounded-full border border-dorado/40 bg-white/70 px-4 py-1.5 text-[13px] font-bold text-celeste-deep backdrop-blur">
-              <span className="text-dorado">★★★</span>
-              La comunidad latina en Barcelona
-            </div>
+            <span className="reveal inline-block text-[15px] font-bold uppercase tracking-[0.16em] text-white/90">
+              Argentinos &amp; uruguayos en Barcelona
+            </span>
 
-            <h1 className="reveal mt-6 font-brand uppercase text-[clamp(2.6rem,6vw,4.6rem)] leading-[0.98] tracking-tight text-ink">
-              Servicios de confianza,
-              <br />
-              <span className="text-celeste">
-                recomendados por
-                <br className="hidden sm:block" /> los tuyos.
-              </span>
+            <h1 className="reveal mt-6 font-brand uppercase text-[clamp(2.8rem,6.5vw,5rem)] leading-[1.02] text-white text-balance">
+              Las páginas <span className="text-dorado">amarillas</span> de los nuestros
             </h1>
 
-            <p className="reveal mt-6 max-w-xl text-lg leading-relaxed text-muted">
-              Messirve es el directorio donde la comunidad latinoamericana en Barcelona{' '}
-              <strong className="text-ink font-semibold">encuentra, califica y recomienda</strong> los
-              servicios en los que confía. Sin algoritmos. Con tu gente.
+            <p className="reveal mt-6 max-w-xl text-lg leading-relaxed text-white/95">
+              Encontrá servicios de tu comunidad, valorados por quienes entienden exactamente de dónde venís y
+              qué buscás.
             </p>
 
-            <div className="reveal mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <Link
-                href="/register"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-celeste px-7 py-3.5 text-[16px] font-bold text-white shadow-soft transition-all hover:bg-celeste-dark hover:-translate-y-0.5"
+            {/* Search bar */}
+            <form
+              action="/search"
+              method="get"
+              className="reveal mt-9 flex max-w-xl items-center gap-3 rounded-full bg-cream py-2.5 pl-7 pr-2.5 shadow-soft"
+            >
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#7A756A" strokeWidth={2.2} className="shrink-0">
+                <circle cx={11} cy={11} r={7} />
+                <path d="M21 21l-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                name="q"
+                placeholder="¿Qué estás buscando? Empanadas, gestor, peluquería…"
+                className="flex-1 border-none bg-transparent text-[17px] text-ink outline-none placeholder:text-muted/70"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-full bg-celeste-deep px-7 py-3 text-[16px] font-bold text-white transition-colors hover:bg-[#15212F]"
               >
-                Registrate gratis
-                <span className="transition-transform group-hover:translate-x-1">→</span>
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-full border-2 border-gris/70 bg-white px-7 py-3.5 text-[16px] font-bold text-ink transition-all hover:border-celeste hover:text-celeste-deep"
-              >
-                Ya tengo cuenta
-              </Link>
-            </div>
+                Buscar
+              </button>
+            </form>
 
-            {/* Social proof */}
-            <div className="reveal mt-9 flex items-center gap-4">
-              <div className="flex -space-x-3">
-                <span className="h-9 w-9 rounded-full ring-2 ring-cream bg-celeste/60 grid place-items-center text-sm">
-                  🧉
-                </span>
-                <span className="h-9 w-9 rounded-full ring-2 ring-cream bg-dorado/50 grid place-items-center text-sm">
-                  🥐
-                </span>
-                <span className="h-9 w-9 rounded-full ring-2 ring-cream bg-celeste/40 grid place-items-center text-sm">
-                  ✂️
-                </span>
-                <span className="h-9 w-9 rounded-full ring-2 ring-cream bg-dorado/40 grid place-items-center text-sm">
-                  🩺
-                </span>
-              </div>
-              <p className="text-sm text-muted leading-snug">
-                Reseñas reales de <strong className="text-ink font-bold">tu comunidad</strong>
-                <br />
-                repartidas en 7 categorías de servicios.
-              </p>
+            <div className="reveal mt-6 flex flex-wrap items-center gap-2.5">
+              <span className="text-[15px] text-white/85">Popular:</span>
+              {['Empanadas', 'Gestoría', 'Mudanzas'].map((term) => (
+                <Link
+                  key={term}
+                  href={`/search?q=${encodeURIComponent(term)}`}
+                  className="rounded-full bg-white/15 px-4 py-1.5 text-[15px] font-semibold text-white transition-colors hover:bg-white/25"
+                >
+                  {term}
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Phone mockup column */}
-          <div className="relative flex justify-center lg:justify-end">
-            <div
-              className="float-slow absolute -top-6 left-6 text-dorado text-2xl select-none"
-              data-parallax="0.3"
-            >
-              ★
-            </div>
-            <div
-              className="float-slow absolute top-24 -left-2 text-celeste text-lg select-none"
-              data-parallax="0.5"
-            >
-              ★
-            </div>
-
-            <div
-              id="phone"
-              className="reveal relative w-[300px] sm:w-[340px] rounded-[2.6rem] border-[10px] border-ink/90 bg-ink"
-              style={{ boxShadow: '0 50px 120px -40px rgba(47,115,163,0.55)' }}
-            >
-              {/* Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-6 w-32 rounded-b-2xl bg-ink z-20" />
-              <div className="relative overflow-hidden rounded-[2rem] bg-cream">
-                {/* Status bar */}
-                <div className="flex items-center justify-between px-5 pt-3 pb-1 text-[11px] font-bold text-ink/70">
-                  <span>9:41</span>
-                  <span className="tracking-widest">●●●● ⌶</span>
+          {/* Floating review card */}
+          <div className="relative">
+            <div className="reveal rounded-3xl bg-cream p-8" style={{ boxShadow: '0 30px 70px -20px rgba(27,42,61,0.35)' }}>
+              <div className="flex items-center gap-4">
+                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-celeste font-brand text-2xl text-white">
+                  V
                 </div>
-
-                {/* App header */}
-                <div className="px-5 pt-2 pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] font-bold text-muted">📍 Barcelona</p>
-                      <p className="font-brand text-2xl text-celeste leading-none mt-0.5">Messirve</p>
-                    </div>
-                    <span className="h-9 w-9 rounded-full bg-celeste/15 grid place-items-center text-celeste-deep">
-                      👤
-                    </span>
-                  </div>
-                  {/* Search */}
-                  <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white border border-gris/50 px-3.5 py-2.5 text-sm text-muted shadow-sm">
-                    <span>🔍</span> Buscá un servicio…
-                  </div>
-                </div>
-
-                {/* Category chips */}
-                <div className="flex gap-2 overflow-x-auto no-scrollbar px-5 pb-3">
-                  <span className="shrink-0 rounded-full bg-celeste px-3 py-1.5 text-[12px] font-bold text-white">
-                    Todos
-                  </span>
-                  <span className="shrink-0 rounded-full bg-white border border-gris/60 px-3 py-1.5 text-[12px] font-semibold text-ink/70">
-                    🍽️ Gastro
-                  </span>
-                  <span className="shrink-0 rounded-full bg-white border border-gris/60 px-3 py-1.5 text-[12px] font-semibold text-ink/70">
-                    💊 Salud
-                  </span>
-                  <span className="shrink-0 rounded-full bg-white border border-gris/60 px-3 py-1.5 text-[12px] font-semibold text-ink/70">
-                    🏠 Hogar
-                  </span>
-                </div>
-
-                {/* Service cards */}
-                <div className="px-5 pb-6 space-y-3">
-                  <div className="rounded-2xl bg-white border border-gris/40 p-3 shadow-sm flex gap-3">
-                    <div className="h-14 w-14 shrink-0 rounded-xl bg-celeste/15 grid place-items-center text-2xl">
-                      ✂️
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-[14px] text-ink truncate">Peluquería La Porteña</p>
-                        <span className="text-celeste">♥</span>
-                      </div>
-                      <p className="text-[11px] text-muted">Indumentaria &amp; Belleza · 1,2 km</p>
-                      <p className="mt-1 text-[12px] font-bold text-dorado">
-                        ★★★★★ <span className="text-muted font-semibold">4.9 · 128</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-white border border-gris/40 p-3 shadow-sm flex gap-3">
-                    <div className="h-14 w-14 shrink-0 rounded-xl bg-dorado/15 grid place-items-center text-2xl">
-                      🧉
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-[14px] text-ink truncate">Almacén Don Mate</p>
-                        <span className="text-gris">♡</span>
-                      </div>
-                      <p className="text-[11px] text-muted">Gastronomía · 600 m</p>
-                      <p className="mt-1 text-[12px] font-bold text-dorado">
-                        ★★★★★ <span className="text-muted font-semibold">4.8 · 96</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-white border border-gris/40 p-3 shadow-sm flex gap-3">
-                    <div className="h-14 w-14 shrink-0 rounded-xl bg-celeste/15 grid place-items-center text-2xl">
-                      📋
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-[14px] text-ink truncate">Gestoría Río de la Plata</p>
-                        <span className="text-gris">♡</span>
-                      </div>
-                      <p className="text-[11px] text-muted">Asesoría &amp; Gestoría · 2,1 km</p>
-                      <p className="mt-1 text-[12px] font-bold text-dorado">
-                        ★★★★<span className="text-gris">★</span>{' '}
-                        <span className="text-muted font-semibold">4.6 · 54</span>
-                      </p>
-                    </div>
-                  </div>
+                <div>
+                  <p className="text-[19px] font-semibold text-ink">Empanadas del barrio</p>
+                  <p className="text-[15px] text-muted">Gastronomía · Gràcia</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ VALOR ============ */}
-      <section id="valor" className="relative py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="max-w-3xl">
-            <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">
-              La propuesta de valor
-            </p>
-            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
-              Acá la confianza no la
-              <br className="hidden sm:block" /> decide un algoritmo.{' '}
-              <span className="text-celeste">La decide tu gente.</span>
-            </h2>
-            <p className="reveal mt-6 text-lg leading-relaxed text-muted">
-              Cada recomendación viene de un compatriota que pasó por lo mismo que vos: llegar a una ciudad
-              nueva y necesitar a alguien de confianza. Messirve junta esas voces en un solo lugar.
-            </p>
-          </div>
-
-          <div className="mt-14 grid sm:grid-cols-3 gap-5" data-stagger>
-            <div className="reveal group rounded-3xl border border-gris/40 bg-white p-7 shadow-card transition-all hover:-translate-y-1.5 hover:border-celeste/50">
-              <div className="h-12 w-12 rounded-2xl bg-celeste/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
-                🤝
+              <div className="mt-5 flex items-center gap-2">
+                <span className="text-dorado text-lg tracking-[2px]">★★★★★</span>
+                <span className="font-brand text-lg text-ink">5,0</span>
+                <span className="text-[14px] text-muted">· 48 reseñas</span>
               </div>
-              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Reseñas reales</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-muted">
-                De gente que de verdad usó el servicio. Nada de reviews fantasma ni puestos para rellenar.
-              </p>
-            </div>
-
-            <div className="reveal group rounded-3xl border border-gris/40 bg-white p-7 shadow-card transition-all hover:-translate-y-1.5 hover:border-celeste/50">
-              <div className="h-12 w-12 rounded-2xl bg-dorado/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
-                🧉
-              </div>
-              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Tu propia comunidad</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-muted">
-                Rioplatenses y latinos que ya están en Barcelona y entienden lo que estás buscando.
-              </p>
-            </div>
-
-            <div className="reveal group rounded-3xl border border-gris/40 bg-white p-7 shadow-card transition-all hover:-translate-y-1.5 hover:border-celeste/50">
-              <div className="h-12 w-12 rounded-2xl bg-celeste/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
-                ✨
-              </div>
-              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Cero algoritmos</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-muted">
-                Ordenado por confianza de la comunidad, no por quién paga más para aparecer primero.
+              <p className="mt-4 text-[17px] italic leading-relaxed text-[#43413B]">
+                &quot;Tal cual las de la esquina de casa. De diez.&quot;
               </p>
             </div>
           </div>
@@ -394,66 +230,52 @@ export default function LandingPage() {
       </section>
 
       {/* ============ CÓMO FUNCIONA ============ */}
-      <section
-        id="como"
-        className="relative bg-celeste-deep py-24 sm:py-32 text-white overflow-hidden"
-      >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: 'radial-gradient(white 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div
-          className="float-slow pointer-events-none absolute -top-20 right-10 text-white/10 text-[10rem] font-brand select-none"
-          data-parallax="0.25"
-        >
-          ★
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="max-w-2xl">
-            <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-celeste-light">
+      <section id="como" className="relative grain py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="text-center">
+            <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">Para usuarios</p>
+            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
               Cómo funciona
-            </p>
-            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02]">
-              En tres pasos ya estás adentro.
             </h2>
           </div>
 
-          <div className="mt-16 grid md:grid-cols-3 gap-6" data-stagger>
-            <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
-              <span className="font-brand text-6xl text-celeste-light/70">01</span>
-              <h3 className="mt-4 font-brand uppercase text-2xl">Explorá</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/75">
-                Buscá entre 7 categorías, desde un plomero hasta una peluquería que te entienda el
-                acento.
+          <div className="mt-14 grid sm:grid-cols-3 gap-6" data-stagger>
+            <div className="reveal rounded-3xl border border-gris/40 bg-white p-9">
+              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-celeste font-brand text-3xl text-white">1</div>
+              <h3 className="mt-6 font-brand uppercase text-2xl text-ink">Buscá</h3>
+              <p className="mt-2 text-[16px] leading-relaxed text-muted">
+                El servicio que necesitás en Barcelona, filtrado por rubro.
               </p>
             </div>
+            <div className="reveal rounded-3xl border border-gris/40 bg-white p-9">
+              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-dorado font-brand text-3xl text-celeste-deep">2</div>
+              <h3 className="mt-6 font-brand uppercase text-2xl text-ink">Compará</h3>
+              <p className="mt-2 text-[16px] leading-relaxed text-muted">
+                Reseñas y valoraciones reales de tus compatriotas.
+              </p>
+            </div>
+            <div className="reveal rounded-3xl border border-gris/40 bg-white p-9">
+              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-celeste-deep font-brand text-3xl text-white">3</div>
+              <h3 className="mt-6 font-brand uppercase text-2xl text-ink">Contactá</h3>
+              <p className="mt-2 text-[16px] leading-relaxed text-muted">
+                Al emprendedor directamente, usando tu medio preferido.
+              </p>
+            </div>
+          </div>
 
-            <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
-              <span className="font-brand text-6xl text-celeste-light/70">02</span>
-              <h3 className="mt-4 font-brand uppercase text-2xl">Confiá</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/75">
-                Leé las reseñas y calificaciones que dejó tu comunidad antes de decidir a quién
-                llamar.
-              </p>
-            </div>
-
-            <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
-              <span className="font-brand text-6xl text-celeste-light/70">03</span>
-              <h3 className="mt-4 font-brand uppercase text-2xl">Sumá lo tuyo</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/75">
-                Guardá favoritos, calificá y dejá tu reseña para los que vienen llegando atrás tuyo.
-              </p>
-            </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-full bg-celeste-deep px-9 py-4 text-[17px] font-bold uppercase tracking-wide text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-[#15212F]"
+            >
+              Sumate gratis
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ============ CTA EMPRENDEDORES ============ */}
-      <section className="relative bg-celeste-deep overflow-hidden">
+      <section id="emprendedores" className="relative bg-celeste-deep overflow-hidden">
         <div
           className="float-slow pointer-events-none absolute -left-24 -bottom-24 h-[24rem] w-[24rem] rounded-full bg-white/10 blur-3xl"
           data-parallax="0.15"
@@ -482,179 +304,53 @@ export default function LandingPage() {
       </section>
 
       {/* ============ CATEGORÍAS ============ */}
-      <section id="categorias" className="relative grain py-24 sm:py-32">
+      <section id="categorias" className="relative py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div className="max-w-2xl">
-              <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">
-                7 categorías
-              </p>
-              <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
-                Todo lo que necesitás, <span className="text-celeste">en un solo lugar.</span>
-              </h2>
-            </div>
-            <p className="reveal text-[15px] text-muted max-w-sm">
-              De lo cotidiano a lo importante: servicios pensados para quienes están lejos de casa.
-            </p>
+          <div className="text-center">
+            <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">Todo lo nuestro</p>
+            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
+              Explorá por categoría
+            </h2>
           </div>
 
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" data-stagger>
-            {[
-              { emoji: '🏠', name: 'Hogar', desc: 'Plomeros, mudanzas, limpieza y arreglos.' },
-              { emoji: '🍽️', name: 'Gastronomía', desc: 'El sabor de casa y los productos que extrañás.' },
-              { emoji: '💊', name: 'Salud & Bienestar', desc: 'Profesionales que te atienden en tu idioma.' },
-              { emoji: '🎨', name: 'Arte & Entretenimiento', desc: 'Eventos, música y cultura de la comunidad.' },
-              { emoji: '👗', name: 'Indumentaria & Belleza', desc: 'Peluquerías, estética y moda con tu estilo.' },
-              { emoji: '🏨', name: 'Hospedaje para Turistas', desc: 'Para los que vienen de visita, bien recomendado.' },
-              { emoji: '📋', name: 'Asesoría & Gestoría', desc: 'Papeles, NIE, trámites y todo lo legal.' },
-            ].map(({ emoji, name, desc }) => (
+          <div className="mt-12 flex flex-wrap justify-center gap-4" data-stagger>
+            {CATEGORIAS.map((c, i) => (
               <Link
-                key={name}
+                key={c.name}
                 href="/register"
-                className="reveal group rounded-3xl border border-gris/40 bg-white p-6 shadow-card transition-all hover:-translate-y-1.5 hover:border-celeste/60"
+                className={`reveal rounded-full px-6 py-3 text-[16px] font-semibold shadow-soft transition-all hover:-translate-y-0.5 ${
+                  i % 2 === 0 ? 'bg-celeste text-white hover:bg-celeste-dark' : 'bg-dorado text-celeste-deep hover:bg-dorado-light'
+                }`}
               >
-                <div className="text-4xl transition-transform group-hover:scale-110 group-hover:-rotate-6">
-                  {emoji}
-                </div>
-                <h3 className="mt-4 font-brand uppercase text-xl text-ink">{name}</h3>
-                <p className="mt-1 text-[13px] text-muted">{desc}</p>
+                {c.name}
               </Link>
             ))}
-
-            {/* CTA tile */}
-            <Link
-              href="/register"
-              className="reveal group rounded-3xl bg-celeste p-6 shadow-soft transition-all hover:-translate-y-1.5 hover:bg-celeste-dark flex flex-col justify-between text-white"
-            >
-              <div className="text-3xl text-dorado-light">★★★</div>
-              <div>
-                <h3 className="mt-4 font-brand uppercase text-xl leading-tight">
-                  Sumate y empezá
-                  <br />a explorar
-                </h3>
-                <p className="mt-2 inline-flex items-center gap-1 text-[14px] font-bold">
-                  Crear cuenta <span className="transition-transform group-hover:translate-x-1">→</span>
-                </p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ CTA FINAL ============ */}
-      <section className="relative py-20 sm:py-24">
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="reveal relative overflow-hidden rounded-[2.5rem] border border-dorado/30 bg-white px-8 py-14 sm:px-16 sm:py-20 text-center shadow-card">
-            <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-celeste/20 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 -right-12 h-56 w-56 rounded-full bg-dorado/20 blur-3xl" />
-
-            <div className="relative">
-              <div className="text-dorado text-3xl">★★★</div>
-              <h2 className="mt-5 font-brand uppercase text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.02] text-ink">
-                ¿Listo para encontrar
-                <br />tu gente de confianza?
-              </h2>
-              <p className="mt-5 mx-auto max-w-xl text-lg text-muted">
-                Registrate gratis y empezá a explorar los servicios que la comunidad latina de Barcelona ya
-                recomienda.
-              </p>
-              <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/register"
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-celeste px-8 py-4 text-[16px] font-bold text-white shadow-soft transition-all hover:bg-celeste-dark hover:-translate-y-0.5"
-                >
-                  Crear mi cuenta
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center rounded-full border-2 border-gris/70 bg-white px-8 py-4 text-[16px] font-bold text-ink transition-all hover:border-celeste hover:text-celeste-deep"
-                >
-                  Iniciar sesión
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="border-t border-gris/40 bg-cream">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 py-14">
-          <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-            <div>
-              <Image
-                src="/messirve-logo.png"
-                alt="Messirve Barcelona"
-                width={120}
-                height={48}
-                className="h-12 w-auto"
-              />
-              <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-muted">
-                El directorio de servicios de confianza de la comunidad latinoamericana en Barcelona.
-              </p>
-            </div>
-
-            <div>
-              <p className="font-brand uppercase text-lg text-ink">Producto</p>
-              <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
-                <li>
-                  <a href="#valor" className="hover:text-celeste-deep transition-colors">
-                    Por qué Messirve
-                  </a>
-                </li>
-                <li>
-                  <a href="#como" className="hover:text-celeste-deep transition-colors">
-                    Cómo funciona
-                  </a>
-                </li>
-                <li>
-                  <a href="#categorias" className="hover:text-celeste-deep transition-colors">
-                    Categorías
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-brand uppercase text-lg text-ink">Comunidad</p>
-              <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
-                <li>
-                  <Link href="/register" className="hover:text-celeste-deep transition-colors">
-                    Sumate
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-celeste-deep transition-colors">
-                    Iniciar sesión
-                  </Link>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-celeste-deep transition-colors">
-                    Sumá tu negocio
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-brand uppercase text-lg text-ink">Legal</p>
-              <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
-                <li>
-                  <Link href="/terms-and-conditions" className="hover:text-celeste-deep transition-colors">
-                    Términos
-                  </Link>
-                </li>
-              </ul>
-            </div>
+      <footer className="bg-celeste-deep">
+        <div className="text-center py-9 px-5">
+          <span className="font-brand uppercase text-3xl tracking-[0.06em] text-dorado">Messirve te sirve</span>
+        </div>
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-5 pb-14 sm:flex-row sm:justify-between sm:px-8">
+          <Image src="/messirve-logo.png" alt="Messirve Barcelona" width={120} height={44} className="h-[70px] w-auto" />
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            <a href="#" className="text-[16px] text-white/75 transition-colors hover:text-white">
+              Sobre nosotros
+            </a>
+            <a href="#" className="text-[16px] text-white/75 transition-colors hover:text-white">
+              Contacto
+            </a>
+            <Link href="/terms-and-conditions" className="text-[16px] text-white/75 transition-colors hover:text-white">
+              Términos
+            </Link>
+            <Link href="/terms-and-conditions" className="text-[16px] text-white/75 transition-colors hover:text-white">
+              Privacidad
+            </Link>
           </div>
-
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gris/40 pt-6 text-[13px] text-muted">
-            <p>© 2026 Messirve · Hecho con cariño para la comunidad en Barcelona 🧉</p>
-            <p className="flex items-center gap-2">
-              <span className="text-dorado">★★★</span> Mercado de servicios
-            </p>
-          </div>
+          <span className="text-[15px] text-white/50">© 2026 Messirve · Barcelona</span>
         </div>
       </footer>
     </div>

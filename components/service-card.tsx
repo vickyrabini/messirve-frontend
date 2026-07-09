@@ -1,8 +1,9 @@
+import Link from 'next/link'
 import { StarRating } from '@/components/star-rating'
 import { toggleLike } from '@/app/actions/services'
 import type { ServiceWithStats } from '@/types/database'
 
-const PLACEHOLDER_COLORS: Record<string, [string, string]> = {
+export const PLACEHOLDER_COLORS: Record<string, [string, string]> = {
   hogar: ['#72B8E6', '#4A9FD4'],
   gastronomia: ['#E8956A', '#D4733E'],
   'salud-bienestar': ['#7EC8A4', '#4FAF7E'],
@@ -95,7 +96,9 @@ export function ServiceCard({ service }: Props) {
               ? `${service.total_likes} favorito${service.total_likes !== 1 ? 's' : ''}`
               : 'Sé el primero'}
           </span>
-          <span className="text-[13px] font-bold text-celeste">Ver más →</span>
+          <Link href={`/services/${service.id}`} className="text-[13px] font-bold text-celeste hover:underline">
+            Ver más →
+          </Link>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toggleServiceActive } from '@/app/actions/admin'
-import { Pagination } from '../pagination'
+import { Pagination } from '@/components/pagination'
 
 const PAGE_SIZE = 10
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { Pagination } from '../pagination'
+import { Pagination } from '@/components/pagination'
 import type { ClientRequestStatus } from '@/types/database'
 
 const PAGE_SIZE = 10
