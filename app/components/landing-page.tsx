@@ -167,7 +167,7 @@ export default function LandingPage() {
               La comunidad latina en Barcelona
             </div>
 
-            <h1 className="reveal mt-6 font-brand text-[clamp(2.6rem,6vw,4.6rem)] leading-[0.98] tracking-tight text-ink">
+            <h1 className="reveal mt-6 font-brand uppercase text-[clamp(2.6rem,6vw,4.6rem)] leading-[0.98] tracking-tight text-ink">
               Servicios de confianza,
               <br />
               <span className="text-celeste">
@@ -348,7 +348,7 @@ export default function LandingPage() {
             <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">
               La propuesta de valor
             </p>
-            <h2 className="reveal mt-4 font-brand text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
+            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
               Acá la confianza no la
               <br className="hidden sm:block" /> decide un algoritmo.{' '}
               <span className="text-celeste">La decide tu gente.</span>
@@ -364,7 +364,7 @@ export default function LandingPage() {
               <div className="h-12 w-12 rounded-2xl bg-celeste/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
                 🤝
               </div>
-              <h3 className="mt-5 font-brand text-2xl text-ink">Reseñas reales</h3>
+              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Reseñas reales</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-muted">
                 De gente que de verdad usó el servicio. Nada de reviews fantasma ni puestos para rellenar.
               </p>
@@ -374,7 +374,7 @@ export default function LandingPage() {
               <div className="h-12 w-12 rounded-2xl bg-dorado/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
                 🧉
               </div>
-              <h3 className="mt-5 font-brand text-2xl text-ink">Tu propia comunidad</h3>
+              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Tu propia comunidad</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-muted">
                 Rioplatenses y latinos que ya están en Barcelona y entienden lo que estás buscando.
               </p>
@@ -384,7 +384,7 @@ export default function LandingPage() {
               <div className="h-12 w-12 rounded-2xl bg-celeste/15 grid place-items-center text-2xl transition-transform group-hover:scale-110">
                 ✨
               </div>
-              <h3 className="mt-5 font-brand text-2xl text-ink">Cero algoritmos</h3>
+              <h3 className="mt-5 font-brand uppercase text-2xl text-ink">Cero algoritmos</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-muted">
                 Ordenado por confianza de la comunidad, no por quién paga más para aparecer primero.
               </p>
@@ -417,7 +417,7 @@ export default function LandingPage() {
             <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-celeste-light">
               Cómo funciona
             </p>
-            <h2 className="reveal mt-4 font-brand text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02]">
+            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02]">
               En tres pasos ya estás adentro.
             </h2>
           </div>
@@ -425,7 +425,7 @@ export default function LandingPage() {
           <div className="mt-16 grid md:grid-cols-3 gap-6" data-stagger>
             <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
               <span className="font-brand text-6xl text-celeste-light/70">01</span>
-              <h3 className="mt-4 font-brand text-2xl">Explorá</h3>
+              <h3 className="mt-4 font-brand uppercase text-2xl">Explorá</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-white/75">
                 Buscá entre 7 categorías, desde un plomero hasta una peluquería que te entienda el
                 acento.
@@ -434,7 +434,7 @@ export default function LandingPage() {
 
             <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
               <span className="font-brand text-6xl text-celeste-light/70">02</span>
-              <h3 className="mt-4 font-brand text-2xl">Confiá</h3>
+              <h3 className="mt-4 font-brand uppercase text-2xl">Confiá</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-white/75">
                 Leé las reseñas y calificaciones que dejó tu comunidad antes de decidir a quién
                 llamar.
@@ -443,12 +443,41 @@ export default function LandingPage() {
 
             <div className="reveal relative rounded-3xl bg-white/5 border border-white/15 p-8 backdrop-blur-sm transition-all hover:bg-white/10">
               <span className="font-brand text-6xl text-celeste-light/70">03</span>
-              <h3 className="mt-4 font-brand text-2xl">Sumá lo tuyo</h3>
+              <h3 className="mt-4 font-brand uppercase text-2xl">Sumá lo tuyo</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-white/75">
                 Guardá favoritos, calificá y dejá tu reseña para los que vienen llegando atrás tuyo.
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ============ CTA EMPRENDEDORES ============ */}
+      <section className="relative bg-celeste-deep overflow-hidden">
+        <div
+          className="float-slow pointer-events-none absolute -left-24 -bottom-24 h-[24rem] w-[24rem] rounded-full bg-white/10 blur-3xl"
+          data-parallax="0.15"
+        />
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-24 flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div className="max-w-2xl" data-stagger>
+            <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-celeste-light">
+              Para emprendedores
+            </p>
+            <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-white">
+              ¿Emprendés en Barcelona?
+            </h2>
+            <p className="reveal mt-5 text-lg leading-relaxed text-white/85">
+              Sumá tu servicio para no quedarte afuera de la comunidad rioplatense en la ciudad. Tus compatriotas te
+              necesitan.
+            </p>
+          </div>
+          <Link
+            href="/register"
+            className="reveal group shrink-0 inline-flex items-center gap-2 rounded-full bg-dorado px-10 py-5 text-[18px] font-bold uppercase tracking-wide text-celeste-deep shadow-soft transition-all hover:-translate-y-0.5 hover:bg-dorado-light"
+          >
+            Suscribite
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
         </div>
       </section>
 
@@ -460,7 +489,7 @@ export default function LandingPage() {
               <p className="reveal text-sm font-bold uppercase tracking-[0.2em] text-dorado-dark">
                 7 categorías
               </p>
-              <h2 className="reveal mt-4 font-brand text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
+              <h2 className="reveal mt-4 font-brand uppercase text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] text-ink">
                 Todo lo que necesitás, <span className="text-celeste">en un solo lugar.</span>
               </h2>
             </div>
@@ -487,7 +516,7 @@ export default function LandingPage() {
                 <div className="text-4xl transition-transform group-hover:scale-110 group-hover:-rotate-6">
                   {emoji}
                 </div>
-                <h3 className="mt-4 font-brand text-xl text-ink">{name}</h3>
+                <h3 className="mt-4 font-brand uppercase text-xl text-ink">{name}</h3>
                 <p className="mt-1 text-[13px] text-muted">{desc}</p>
               </Link>
             ))}
@@ -499,7 +528,7 @@ export default function LandingPage() {
             >
               <div className="text-3xl text-dorado-light">★★★</div>
               <div>
-                <h3 className="mt-4 font-brand text-xl leading-tight">
+                <h3 className="mt-4 font-brand uppercase text-xl leading-tight">
                   Sumate y empezá
                   <br />a explorar
                 </h3>
@@ -521,7 +550,7 @@ export default function LandingPage() {
 
             <div className="relative">
               <div className="text-dorado text-3xl">★★★</div>
-              <h2 className="mt-5 font-brand text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.02] text-ink">
+              <h2 className="mt-5 font-brand uppercase text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.02] text-ink">
                 ¿Listo para encontrar
                 <br />tu gente de confianza?
               </h2>
@@ -567,7 +596,7 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <p className="font-brand text-lg text-ink">Producto</p>
+              <p className="font-brand uppercase text-lg text-ink">Producto</p>
               <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
                 <li>
                   <a href="#valor" className="hover:text-celeste-deep transition-colors">
@@ -588,7 +617,7 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <p className="font-brand text-lg text-ink">Comunidad</p>
+              <p className="font-brand uppercase text-lg text-ink">Comunidad</p>
               <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
                 <li>
                   <Link href="/register" className="hover:text-celeste-deep transition-colors">
@@ -609,7 +638,7 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <p className="font-brand text-lg text-ink">Legal</p>
+              <p className="font-brand uppercase text-lg text-ink">Legal</p>
               <ul className="mt-4 space-y-2.5 text-[15px] text-muted">
                 <li>
                   <Link href="/terms-and-conditions" className="hover:text-celeste-deep transition-colors">
