@@ -7,7 +7,12 @@ import type { ClientRequest, ClientRequestStatus } from '@/types/database'
 const statusBadgeClass: Record<ClientRequestStatus, string> = {
   pending: 'bg-dorado/10 text-dorado-dark',
   approved: 'bg-celeste/10 text-celeste-deep',
-  rejected: 'bg-red-50 text-red-500',
+  rejected: '',
+}
+const statusBadgeStyle: Record<ClientRequestStatus, React.CSSProperties | undefined> = {
+  pending: undefined,
+  approved: undefined,
+  rejected: { background: '#FBEAE7', color: '#A63B24' },
 }
 const statusLabel: Record<ClientRequestStatus, string> = {
   pending: 'Pendiente',
@@ -44,16 +49,15 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
   const email = authData?.user?.email ?? '—'
 
   return (
-    <div className="min-h-screen bg-cream">
-      <main className="mx-auto max-w-md px-6 py-12">
-        <Link href="/admin/requests" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
-          <span>←</span> Volver a solicitudes
-        </Link>
+    <div className="mx-auto max-w-md px-8 py-10">
+      <Link href="/admin/requests" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
+        <span>←</span> Volver a solicitudes
+      </Link>
 
-        <h1 className="mt-4 font-brand text-2xl text-ink">Solicitud de {fullName}</h1>
-        <p className="mt-1 text-sm text-muted">Revisá los datos y aprobá o rechazá la solicitud</p>
+      <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Solicitud de {fullName}</h1>
+      <p className="mt-1 text-sm text-muted">Revisá los datos y aprobá o rechazá la solicitud</p>
 
-        <div className="mt-6 space-y-5 rounded-2xl border border-gris/30 bg-white p-8">
+      <div className="mt-6 space-y-5 rounded-2xl border border-gris/30 bg-white p-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">Usuario</p>
             <p className="mt-1 text-sm text-ink">{fullName}</p>
@@ -71,7 +75,10 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">Estado</p>
-            <span className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[request.status]}`}>
+            <span
+              className={`mt-1 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[request.status]}`}
+              style={statusBadgeStyle[request.status]}
+            >
               {statusLabel[request.status]}
             </span>
           </div>
@@ -98,7 +105,7 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
                 <input type="hidden" name="userId" value={request.user_id} />
                 <button
                   type="submit"
-                  className="cursor-pointer rounded-xl border border-celeste/40 px-5 py-2.5 text-sm font-semibold text-celeste-deep transition-colors hover:border-celeste hover:bg-celeste/10"
+                  className="cursor-pointer rounded-full bg-celeste px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark"
                 >
                   Aprobar
                 </button>
@@ -107,15 +114,14 @@ export default async function AdminRequestDetailPage({ params }: { params: Promi
                 <input type="hidden" name="requestId" value={request.id} />
                 <button
                   type="submit"
-                  className="cursor-pointer rounded-xl border border-gris/40 px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-red-300 hover:text-red-500"
+                  className="cursor-pointer rounded-full border border-gris/40 px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-[#E8B4AC] hover:text-[#A63B24]"
                 >
                   Rechazar
                 </button>
               </form>
             </div>
           )}
-        </div>
-      </main>
+      </div>
     </div>
   )
 }

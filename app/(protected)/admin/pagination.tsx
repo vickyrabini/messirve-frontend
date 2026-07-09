@@ -4,7 +4,7 @@ export function Pagination({ page, totalPages, buildHref }: { page: number; tota
   if (totalPages <= 1) return null
 
   const navClass = (disabled: boolean) =>
-    `rounded-lg border border-gris/40 px-3 py-1.5 text-xs font-semibold transition-colors ${
+    `rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold transition-colors ${
       disabled ? 'pointer-events-none opacity-40' : 'text-ink hover:border-celeste hover:text-celeste-deep'
     }`
 

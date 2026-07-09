@@ -15,7 +15,12 @@ type RequestRow = {
 const statusBadgeClass: Record<ClientRequestStatus, string> = {
   pending: 'bg-dorado/10 text-dorado-dark',
   approved: 'bg-celeste/10 text-celeste-deep',
-  rejected: 'bg-red-50 text-red-500',
+  rejected: '',
+}
+const statusBadgeStyle: Record<ClientRequestStatus, React.CSSProperties | undefined> = {
+  pending: undefined,
+  approved: undefined,
+  rejected: { background: '#FBEAE7', color: '#A63B24' },
 }
 const statusLabel: Record<ClientRequestStatus, string> = {
   pending: 'Pendiente',
@@ -48,12 +53,11 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
   const emailById = new Map(userIds.map((id, i) => [id, authResults[i].data.user?.email ?? '—']))
 
   return (
-    <div className="min-h-screen bg-cream">
-      <main className="mx-auto max-w-4xl px-6 py-12">
-        <h1 className="font-brand text-2xl text-ink">Gestión de clientes</h1>
-        <p className="mt-1 text-sm text-muted">Aprobá o rechazá las solicitudes para convertirse en cliente</p>
+    <div className="mx-auto max-w-4xl px-8 py-10">
+      <h1 className="font-brand uppercase text-2xl text-ink">Gestión de clientes</h1>
+      <p className="mt-1 text-sm text-muted">Aprobá o rechazá las solicitudes para convertirse en cliente</p>
 
-        <div className="mt-8 rounded-2xl border border-gris/30 bg-white">
+      <div className="mt-8 rounded-2xl border border-gris/30 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
@@ -70,14 +74,17 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
                     <td className="px-5 py-3 font-medium text-ink">{nameById.get(r.user_id) ?? '—'}</td>
                     <td className="px-5 py-3 text-muted">{emailById.get(r.user_id) ?? '—'}</td>
                     <td className="px-5 py-3">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[r.status]}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[r.status]}`}
+                        style={statusBadgeStyle[r.status]}
+                      >
                         {statusLabel[r.status]}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-right">
                       <Link
                         href={`/admin/requests/${r.id}`}
-                        className="rounded-lg border border-gris/40 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                        className="rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
                       >
                         Ver solicitud
                       </Link>
@@ -93,8 +100,7 @@ export default async function AdminRequestsPage({ searchParams }: { searchParams
           )}
 
           <Pagination page={page} totalPages={totalPages} buildHref={(p) => `/admin/requests?page=${p}`} />
-        </div>
-      </main>
+      </div>
     </div>
   )
 }
