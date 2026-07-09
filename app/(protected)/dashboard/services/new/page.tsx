@@ -23,7 +23,7 @@ export default async function NewServicePage() {
           <span>←</span> Volver al dashboard
         </Link>
 
-        <h1 className="mt-4 font-brand text-2xl text-ink">Publicar un servicio</h1>
+        <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Publicar un servicio</h1>
         <p className="mt-1 text-sm text-muted">
           Tu publicación quedará pendiente de revisión por el equipo de Messirve antes de ser visible para los demás
           usuarios.

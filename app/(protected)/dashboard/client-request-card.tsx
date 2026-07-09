@@ -17,7 +17,7 @@ export function ClientRequestCard({ request }: Props) {
   if (request?.status === 'pending') {
     return (
       <div className="mb-8 rounded-2xl border border-gris/30 bg-white p-8">
-        <h3 className="font-brand text-lg text-ink">¿Querés ser cliente?</h3>
+        <h3 className="font-brand uppercase text-lg text-ink">¿Querés ser cliente?</h3>
         <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-dorado/10 px-3 py-2 text-sm font-semibold text-dorado-dark">
           Tu solicitud está pendiente de revisión
         </p>
@@ -28,7 +28,7 @@ export function ClientRequestCard({ request }: Props) {
   if (request?.status === 'rejected' && !retrying) {
     return (
       <div className="mb-8 rounded-2xl border border-gris/30 bg-white p-8">
-        <h3 className="font-brand text-lg text-ink">¿Querés ser cliente?</h3>
+        <h3 className="font-brand uppercase text-lg text-ink">¿Querés ser cliente?</h3>
         <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">
           Tu solicitud fue rechazada
         </p>
@@ -45,7 +45,7 @@ export function ClientRequestCard({ request }: Props) {
 
   return (
     <div className="mb-8 rounded-2xl border border-gris/30 bg-white p-8">
-      <h3 className="font-brand text-lg text-ink">¿Querés ser cliente?</h3>
+      <h3 className="font-brand uppercase text-lg text-ink">¿Querés ser cliente?</h3>
       <p className="mt-1 text-sm text-muted">Publicá y gestioná tus propios servicios en Messirve</p>
 
       <form action={formAction} className="mt-4 space-y-3">
