@@ -20,12 +20,6 @@ function computeStrength(pw: string): 0 | 1 | 2 | 3 | 4 {
 const STRENGTH_COLORS = ['', 'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'] as const
 const STRENGTH_LABELS = ['', 'Débil', 'Mejorable', 'Buena', 'Excelente'] as const
 
-const BULLETS = [
-  'Reseñas reales de compatriotas, sin algoritmos.',
-  '7 categorías, del plomero a la gestoría.',
-  'Guardá favoritos y calificá lo que probás.',
-]
-
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(register, initialState)
   const [passwordVal, setPasswordVal] = useState('')
@@ -124,7 +118,7 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="font-brand text-2xl text-ink">¡Bienvenido a Messirve!</h3>
+            <h3 className="font-brand uppercase text-2xl text-ink">¡Bienvenido a Messirve!</h3>
             <p className="mt-2 text-[15px] leading-relaxed text-muted">
               Te mandamos un mail para confirmar tu cuenta. Revisá tu bandeja.
             </p>
@@ -144,7 +138,7 @@ export default function RegisterPage() {
         <div className="min-h-full lg:grid lg:grid-cols-[1.05fr_1fr]">
 
           {/* ── PANEL DE MARCA (izq, solo desktop) ── */}
-          <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste-deep p-12 xl:p-16 text-white">
+          <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste p-12 xl:p-16 text-white">
             {/* Dot texture */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -152,7 +146,7 @@ export default function RegisterPage() {
             />
             {/* Glow blobs — GSAP parallax targets */}
             <div ref={glow1Ref} className="float-slow pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-            <div ref={glow2Ref} className="float-slow pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-celeste/30 blur-3xl" />
+            <div ref={glow2Ref} className="float-slow pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-dorado/25 blur-3xl" />
             {/* Giant star */}
             <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 select-none font-brand text-[13rem] leading-none text-white/[0.06]">
               ★
@@ -166,46 +160,29 @@ export default function RegisterPage() {
               </Link>
             </div>
 
-            {/* Centro: copy + bullets */}
+            {/* Centro: copy */}
             <div className="relative z-10 max-w-md">
-              <p className="reveal text-2xl tracking-widest text-dorado-light">★★★</p>
-              <h2
-                className="reveal mt-5 font-brand leading-[1.04]"
-                style={{ fontSize: 'clamp(2.2rem,3.4vw,3.2rem)', transitionDelay: '60ms' }}
-              >
-                Sumate a la comunidad que ya confía en Messirve.
+              <h2 className="reveal font-brand uppercase leading-[0.98]" style={{ fontSize: 'clamp(2.4rem,3.6vw,3.6rem)' }}>
+                Sentite <br />
+                <span style={{ color: '#2C4A73' }}>cerca</span>&nbsp;de casa
               </h2>
-              <p className="reveal mt-5 text-lg leading-relaxed text-white/80" style={{ transitionDelay: '120ms' }}>
-                Creá tu cuenta gratis y empezá a descubrir los servicios que tu gente recomienda en Barcelona.
+              <p className="reveal mt-6 text-lg leading-relaxed text-white/90" style={{ transitionDelay: '60ms' }}>
+                La comunidad argentina y uruguaya en Barcelona, a un toque. Reseñas de los que entienden de dónde
+                venís.
               </p>
-              <ul className="mt-9 space-y-4">
-                {BULLETS.map((text, i) => (
-                  <li
-                    key={text}
-                    className="reveal flex items-center gap-3"
-                    style={{ transitionDelay: `${180 + i * 60}ms` }}
-                  >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 text-sm text-celeste-light">
-                      ✓
-                    </span>
-                    <span className="text-[15px] text-white/90">{text}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
 
-            {/* Testimonio */}
-            <div className="reveal relative z-10 max-w-md rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-              <p className="text-[15px] leading-relaxed text-white/90">
-                {`"Llegué sin conocer a nadie y acá encontré una peluquería que me entendía el acento. Una genia."`}
-              </p>
-              <div className="mt-3 flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-dorado/40 text-base">🧉</span>
-                <div className="text-[13px]">
-                  <p className="font-semibold">Caro · La Plata → Gràcia</p>
-                  <p className="text-dorado-light">★★★★★</p>
-                </div>
-              </div>
+            {/* Estrellas */}
+            <div className="reveal relative z-10 flex items-center gap-2" style={{ transitionDelay: '120ms' }}>
+              <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+                <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+              </svg>
+              <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+                <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+              </svg>
+              <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+                <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+              </svg>
             </div>
           </aside>
 
@@ -228,13 +205,13 @@ export default function RegisterPage() {
               <div className="w-full max-w-[440px]">
                 <header className="mb-8">
                   <h1
-                    className="reveal font-brand leading-tight text-ink"
+                    className="reveal font-brand uppercase leading-tight text-ink"
                     style={{ fontSize: 'clamp(1.9rem,4vw,2.6rem)' }}
                   >
-                    Crear cuenta
+                    Creá tu cuenta
                   </h1>
                   <p className="reveal mt-2 text-[15px] text-muted" style={{ transitionDelay: '60ms' }}>
-                    Es gratis y te toma menos de un minuto.
+                    Sumate a la comunidad. Lleva un minuto.
                   </p>
                 </header>
 
@@ -250,7 +227,7 @@ export default function RegisterPage() {
                       type="text"
                       autoComplete="name"
                       required
-                      placeholder="Juan García"
+                      placeholder="Valentina Gómez"
                       className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
                     />
                   </div>
@@ -266,7 +243,7 @@ export default function RegisterPage() {
                       type="email"
                       autoComplete="email"
                       required
-                      placeholder="tu@email.com"
+                      placeholder="vos@email.com"
                       className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
                     />
                   </div>
@@ -350,9 +327,13 @@ export default function RegisterPage() {
                     <span className="text-[13px] leading-relaxed text-muted">
                       Acepto los{' '}
                       <Link href="/terms-and-conditions" className="font-semibold text-celeste-deep hover:underline">
-                        Términos y condiciones
+                        términos
                       </Link>{' '}
-                      de Messirve.
+                      y la{' '}
+                      <Link href="/terms-and-conditions" className="font-semibold text-celeste-deep hover:underline">
+                        política de privacidad
+                      </Link>
+                      .
                     </span>
                   </label>
 
@@ -368,7 +349,7 @@ export default function RegisterPage() {
                     ref={submitBtnRef}
                     type="submit"
                     disabled={isPending || !termsAccepted}
-                    className="reveal group relative w-full overflow-hidden rounded-xl bg-celeste px-6 py-3.5 text-[16px] font-semibold text-white shadow-soft transition-all hover:bg-celeste-dark hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+                    className="reveal group relative w-full overflow-hidden rounded-xl bg-celeste-deep px-6 py-3.5 text-[16px] font-semibold text-white shadow-soft transition-all hover:bg-[#15212F] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
                     style={{ transitionDelay: '360ms' }}
                   >
                     {isPending ? (
@@ -380,12 +361,7 @@ export default function RegisterPage() {
                         Creando cuenta...
                       </span>
                     ) : (
-                      <span className="inline-flex items-center justify-center gap-2">
-                        Crear cuenta{' '}
-                        <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">
-                          →
-                        </span>
-                      </span>
+                      'Crear cuenta'
                     )}
                   </button>
                 </form>
@@ -393,7 +369,7 @@ export default function RegisterPage() {
                 <p className="reveal mt-6 text-center text-[14px] text-muted" style={{ transitionDelay: '420ms' }}>
                   ¿Ya tenés cuenta?{' '}
                   <Link href="/login" className="font-semibold text-celeste-deep hover:underline">
-                    Iniciá sesión
+                    Ingresá
                   </Link>
                 </p>
               </div>

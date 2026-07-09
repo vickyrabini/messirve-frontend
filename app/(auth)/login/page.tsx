@@ -10,7 +10,6 @@ const initialState = { error: null }
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState)
   const [showPassword, setShowPassword] = useState(false)
-  const [remember, setRemember] = useState(true)
 
   const submitBtnRef = useRef<HTMLButtonElement>(null)
   const glow1Ref = useRef<HTMLDivElement>(null)
@@ -81,7 +80,7 @@ export default function LoginPage() {
     <div className="fixed inset-0 z-50 overflow-y-auto bg-cream">
       <div className="min-h-full lg:grid lg:grid-cols-[1.05fr_1fr]">
         {/* ── PANEL DE MARCA (izq, solo desktop) ── */}
-        <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste-deep p-12 xl:p-16 text-white">
+        <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste p-12 xl:p-16 text-white">
           {/* Dot texture */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -89,7 +88,7 @@ export default function LoginPage() {
           />
           {/* Glow blobs — GSAP parallax targets */}
           <div ref={glow1Ref} className="float-slow pointer-events-none absolute -top-24 -left-20 h-[28rem] w-[28rem] rounded-full bg-white/10 blur-3xl" />
-          <div ref={glow2Ref} className="float-slow pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-celeste/30 blur-3xl" />
+          <div ref={glow2Ref} className="float-slow pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-dorado/25 blur-3xl" />
           {/* Giant star */}
           <div className="pointer-events-none absolute right-10 top-16 select-none font-brand text-[13rem] leading-none text-white/[0.06]">
             ★
@@ -103,44 +102,31 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Centro: copy + stats */}
+          {/* Centro: copy */}
           <div className="relative z-10 max-w-md">
-            <p className="reveal text-2xl tracking-widest text-dorado-light">★★★</p>
             <h2
-              className="reveal mt-5 font-brand leading-[1.04]"
-              style={{ fontSize: 'clamp(2.2rem,3.4vw,3.2rem)', transitionDelay: '60ms' }}
+              className="reveal font-brand uppercase leading-[0.98]"
+              style={{ fontSize: 'clamp(2.4rem,3.6vw,3.6rem)' }}
             >
-              Qué bueno verte de nuevo.
+              Sentite <br />
+              <span style={{ color: '#2C4A73' }}>cerca</span>&nbsp;de casa
             </h2>
-            <p className="reveal mt-5 text-lg leading-relaxed text-white/80" style={{ transitionDelay: '120ms' }}>
-              Iniciá sesión y seguí descubriendo los servicios de confianza que tu comunidad recomienda en Barcelona.
+            <p className="reveal mt-6 text-lg leading-relaxed text-white/90" style={{ transitionDelay: '60ms' }}>
+              La comunidad argentina y uruguaya en Barcelona, a un toque. Reseñas de los que entienden de dónde venís.
             </p>
-
-            <div className="reveal mt-9 flex items-center gap-6" style={{ transitionDelay: '180ms' }}>
-              <div>
-                <p className="font-brand text-3xl text-white">7</p>
-                <p className="text-[13px] text-white/70">categorías</p>
-              </div>
-              <div className="h-10 w-px bg-white/20" />
-              <div>
-                <p className="font-brand text-3xl text-white">★★★★★</p>
-                <p className="text-[13px] text-white/70">reseñas de tu gente</p>
-              </div>
-            </div>
           </div>
 
-          {/* Testimonio */}
-          <div className="reveal relative z-10 max-w-md rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-            <p className="text-[15px] leading-relaxed text-white/90">
-              &quot;Cada vez que necesito algo, entro a Messirve antes que a Google. Es mi gente recomendando.&quot;
-            </p>
-            <div className="mt-3 flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-dorado/40 text-base">🥐</span>
-              <div className="text-[13px]">
-                <p className="font-semibold">Mati · Montevideo → El Raval</p>
-                <p className="text-dorado-light">★★★★★</p>
-              </div>
-            </div>
+          {/* Estrellas */}
+          <div className="reveal relative z-10 flex items-center gap-2" style={{ transitionDelay: '120ms' }}>
+            <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+              <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+            </svg>
+            <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+              <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+            </svg>
+            <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
+              <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
+            </svg>
           </div>
         </aside>
 
@@ -162,11 +148,11 @@ export default function LoginPage() {
           <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
             <div className="w-full max-w-[440px]">
               <header className="mb-8">
-                <h1 className="reveal font-brand leading-tight text-ink" style={{ fontSize: 'clamp(1.9rem,4vw,2.6rem)' }}>
-                  Iniciar sesión
+                <h1 className="reveal font-brand uppercase leading-tight text-ink" style={{ fontSize: 'clamp(1.9rem,4vw,2.6rem)' }}>
+                  Bienvenido de vuelta
                 </h1>
                 <p className="reveal mt-2 text-[15px] text-muted" style={{ transitionDelay: '60ms' }}>
-                  Bienvenido de vuelta a tu comunidad.
+                  Ingresá para seguir descubriendo lo nuestro.
                 </p>
               </header>
 
@@ -182,7 +168,7 @@ export default function LoginPage() {
                     type="email"
                     autoComplete="email"
                     required
-                    placeholder="tu@email.com"
+                    placeholder="vos@email.com"
                     className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
                   />
                 </div>
@@ -204,7 +190,7 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       required
-                      placeholder="Tu contraseña"
+                      placeholder="••••••••"
                       className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 pr-12 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
                     />
                     <button
@@ -228,22 +214,27 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Mantener sesión */}
-                <label className="reveal flex cursor-pointer select-none items-center gap-3" style={{ transitionDelay: '240ms' }}>
-                  <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="sr-only" />
-                  <span
-                    className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 text-[12px] text-white transition-all ${
-                      remember ? 'border-celeste bg-celeste' : 'border-gris/70 bg-white'
-                    }`}
-                  >
-                    {remember && '✓'}
-                  </span>
-                  <span className="text-[14px] text-muted">Mantener la sesión iniciada</span>
-                </label>
-
                 {/* Error del server action */}
                 {state?.error && (
-                  <p className="rounded-lg bg-red-50 px-3 py-2 text-[13px] font-semibold text-red-500">{state.error}</p>
+                  <div className="flex items-start gap-3 rounded-2xl border border-[#E8B4AC] bg-[#FBEAE7] px-5 py-4">
+                    <svg
+                      width={22}
+                      height={22}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#C0492F"
+                      strokeWidth={2.2}
+                      className="mt-0.5 shrink-0"
+                    >
+                      <circle cx={12} cy={12} r={9} />
+                      <path d="M12 8v4" />
+                      <circle cx={12} cy={16} r={0.6} fill="#C0492F" stroke="none" />
+                    </svg>
+                    <div>
+                      <p className="text-[16px] font-semibold text-[#A63B24]">No pudimos iniciar sesión</p>
+                      <p className="mt-0.5 text-[15px] text-[#B4665A]">{state.error}</p>
+                    </div>
+                  </div>
                 )}
 
                 {/* Submit */}
@@ -251,7 +242,7 @@ export default function LoginPage() {
                   ref={submitBtnRef}
                   type="submit"
                   disabled={isPending}
-                  className="reveal group relative w-full overflow-hidden rounded-xl bg-celeste px-6 py-3.5 text-[16px] font-semibold text-white shadow-soft transition-all hover:bg-celeste-dark hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+                  className="reveal group relative w-full overflow-hidden rounded-xl bg-celeste-deep px-6 py-3.5 text-[16px] font-semibold text-white shadow-soft transition-all hover:bg-[#15212F] hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
                   style={{ transitionDelay: '300ms' }}
                 >
                   {isPending ? (
@@ -263,18 +254,13 @@ export default function LoginPage() {
                       Entrando...
                     </span>
                   ) : (
-                    <span className="inline-flex items-center justify-center gap-2">
-                      Iniciar sesión{' '}
-                      <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">
-                        →
-                      </span>
-                    </span>
+                    'Ingresar'
                   )}
                 </button>
               </form>
 
               <p className="reveal mt-6 text-center text-[14px] text-muted" style={{ transitionDelay: '360ms' }}>
-                ¿Todavía no tenés cuenta?{' '}
+                ¿No tenés cuenta?{' '}
                 <Link href="/register" className="font-semibold text-celeste-deep hover:underline">
                   Registrate gratis
                 </Link>
