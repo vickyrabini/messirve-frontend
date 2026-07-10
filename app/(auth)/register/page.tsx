@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { register } from '@/app/actions/auth'
+import { AuthSunDecor } from '@/components/auth-sun-decor'
 
 const initialState = { error: null }
 
@@ -138,7 +139,7 @@ export default function RegisterPage() {
         <div className="min-h-full lg:grid lg:grid-cols-[1.05fr_1fr]">
 
           {/* ── PANEL DE MARCA (izq, solo desktop) ── */}
-          <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste p-12 xl:p-16 text-white">
+          <aside className="relative hidden lg:flex flex-col overflow-hidden bg-celeste p-12 xl:p-16 text-white">
             {/* Dot texture */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -147,21 +148,17 @@ export default function RegisterPage() {
             {/* Glow blobs — GSAP parallax targets */}
             <div ref={glow1Ref} className="float-slow pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
             <div ref={glow2Ref} className="float-slow pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-dorado/25 blur-3xl" />
-            {/* Giant star */}
-            <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 select-none font-brand text-[13rem] leading-none text-white/[0.06]">
-              ★
-            </div>
-            <div className="pointer-events-none absolute bottom-24 left-1/3 select-none text-3xl text-dorado-light/40">★</div>
+            <AuthSunDecor />
 
-            {/* Logo badge */}
+            {/* Logo badge
             <div className="reveal relative z-10">
               <Link href="/" className="inline-flex items-center rounded-2xl bg-white px-4 py-3 shadow-soft">
                 <Image src="/messirve-logo.png" alt="Messirve Barcelona" width={120} height={44} className="h-9 w-auto" />
               </Link>
-            </div>
+            </div> */}
 
             {/* Centro: copy */}
-            <div className="relative z-10 max-w-md">
+            <div className="relative z-10 flex flex-1 flex-col justify-center max-w-md">
               <h2 className="reveal font-brand uppercase leading-[0.98]" style={{ fontSize: 'clamp(2.4rem,3.6vw,3.6rem)' }}>
                 Sentite <br />
                 <span style={{ color: '#2C4A73' }}>cerca</span>&nbsp;de casa
@@ -171,7 +168,6 @@ export default function RegisterPage() {
                 venís.
               </p>
             </div>
-
             {/* Estrellas */}
             <div className="reveal relative z-10 flex items-center gap-2" style={{ transitionDelay: '120ms' }}>
               <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">

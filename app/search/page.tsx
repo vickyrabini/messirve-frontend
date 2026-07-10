@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { ServiceCard } from "@/components/service-card";
 import { Pagination } from "@/components/pagination";
+import { AuthNavActions } from "@/components/auth-nav-actions";
 import type { Category, ServiceWithStats } from "@/types/database";
 
 const PAGE_SIZE = 12;
@@ -117,6 +119,11 @@ export default async function SearchPage({
     return qs ? `/search?${qs}` : "/search";
   };
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-screen bg-cream">
       <header className="border-b border-gris/40 bg-white/90 backdrop-blur">
@@ -130,20 +137,7 @@ export default async function SearchPage({
               className="h-10 w-auto"
             />
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex items-center rounded-full bg-celeste px-5 py-2.5 text-[15px] font-bold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-celeste-dark"
-            >
-              Ingresar
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center rounded-full bg-celeste-deep px-5 py-2.5 text-[15px] font-bold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-[#15212F]"
-            >
-              Registrarse
-            </Link>
-          </div>
+          <AuthNavActions isAuthenticated={!!user} />
         </div>
       </header>
 

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ResetPasswordForm from './reset-password-form'
+import { AuthSunDecor } from '@/components/auth-sun-decor'
 
 export default async function ResetPasswordPage() {
   const supabase = await createClient()
@@ -18,22 +19,23 @@ export default async function ResetPasswordPage() {
     <div className="fixed inset-0 z-50 overflow-y-auto bg-cream">
       <div className="min-h-full lg:grid lg:grid-cols-[1.05fr_1fr]">
         {/* ── PANEL DE MARCA (izq, solo desktop) ── */}
-        <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-celeste p-12 xl:p-16 text-white">
+        <aside className="relative hidden lg:flex flex-col overflow-hidden bg-celeste p-12 xl:p-16 text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.07]"
             style={{ backgroundImage: 'radial-gradient(white 1px, transparent 1px)', backgroundSize: '26px 26px' }}
           />
           <div className="float-slow pointer-events-none absolute -top-24 -left-20 h-[28rem] w-[28rem] rounded-full bg-white/10 blur-3xl" />
           <div className="float-slow pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-dorado/25 blur-3xl" />
-          <div className="pointer-events-none absolute right-10 top-16 select-none font-brand text-[13rem] leading-none text-white/[0.06]">★</div>
+          <AuthSunDecor />
 
+          {/* Logo badge
           <div className="relative z-10">
             <Link href="/" className="inline-flex items-center rounded-2xl bg-white px-4 py-3 shadow-soft">
               <Image src="/messirve-logo.png" alt="Messirve Barcelona" width={120} height={44} className="h-9 w-auto" />
             </Link>
-          </div>
+          </div> */}
 
-          <div className="relative z-10 max-w-md">
+          <div className="relative z-10 flex flex-1 flex-col justify-center max-w-md">
             <h2 className="font-brand uppercase leading-[0.98]" style={{ fontSize: 'clamp(2.4rem,3.6vw,3.6rem)' }}>
               Sentite <br />
               <span style={{ color: '#2C4A73' }}>cerca</span>&nbsp;de casa
@@ -43,7 +45,6 @@ export default async function ResetPasswordPage() {
               venís.
             </p>
           </div>
-
           <div className="relative z-10 flex items-center gap-2">
             <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
               <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
