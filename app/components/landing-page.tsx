@@ -4,22 +4,15 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AuthNavActions } from "@/components/auth-nav-actions";
-
-const CATEGORIAS = [
-  { emoji: "🏠", name: "Hogar" },
-  { emoji: "🍽️", name: "Gastronomía" },
-  { emoji: "💊", name: "Salud & Bienestar" },
-  { emoji: "🎨", name: "Arte & Entretenimiento" },
-  { emoji: "👗", name: "Indumentaria & Belleza" },
-  { emoji: "🏨", name: "Hospedaje para Turistas" },
-  { emoji: "📋", name: "Asesoría & Gestoría" },
-];
+import { getCategoryColor } from "@/lib/category-colors";
+import type { Category } from "@/types/database";
 
 type Props = {
   isAuthenticated: boolean;
+  categories: Category[];
 };
 
-export default function LandingPage({ isAuthenticated }: Props) {
+export default function LandingPage({ isAuthenticated, categories }: Props) {
   const navShellRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -389,19 +382,18 @@ export default function LandingPage({ isAuthenticated }: Props) {
             className="mt-12 flex flex-wrap justify-center gap-4"
             data-stagger
           >
-            {CATEGORIAS.map((c, i) => (
-              <Link
-                key={c.name}
-                href="/register"
-                className={`reveal rounded-full px-6 py-3 text-[16px] font-semibold shadow-soft transition-all hover:-translate-y-0.5 ${
-                  i % 2 === 0
-                    ? "bg-celeste text-white hover:bg-celeste-dark"
-                    : "bg-dorado text-celeste-deep hover:bg-dorado-light"
-                }`}
-              >
-                {c.name}
-              </Link>
-            ))}
+            {categories.map((cat, i) => {
+              const color = getCategoryColor(cat.slug, i);
+              return (
+                <Link
+                  key={cat.id}
+                  href="/register"
+                  className={`reveal rounded-full px-6 py-3 text-[16px] font-semibold shadow-soft transition-all hover:-translate-y-0.5 ${color.bg} ${color.text} ${color.hover}`}
+                >
+                  {cat.name}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
