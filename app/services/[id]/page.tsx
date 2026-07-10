@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { StarRating } from "@/components/star-rating";
 import { PLACEHOLDER_COLORS } from "@/components/service-card";
+import { AuthNavActions } from "@/components/auth-nav-actions";
 import { ReviewForm } from "./review-form";
 import type { Service } from "@/types/database";
 
@@ -105,20 +106,7 @@ export default async function ServiceDetailPage({
               className="h-10 w-auto"
             />
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex items-center rounded-full bg-celeste px-5 py-2.5 text-[15px] font-bold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-celeste-dark"
-            >
-              Ingresar
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center rounded-full bg-celeste-deep px-5 py-2.5 text-[15px] font-bold text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-[#15212F]"
-            >
-              Registrarse
-            </Link>
-          </div>
+          <AuthNavActions isAuthenticated={!!user} />
         </div>
       </header>
 
@@ -282,23 +270,12 @@ export default async function ServiceDetailPage({
           )}
         </div>
 
-        {user ? (
-          <ReviewForm
-            serviceId={service.id}
-            initialStars={ratingByUser.get(user.id) ?? null}
-            initialComment={myComment?.content ?? ""}
-          />
-        ) : (
-          <p className="mt-10 text-center text-[14px] text-muted">
-            <Link
-              href="/login"
-              className="font-semibold text-celeste-deep hover:underline"
-            >
-              Iniciá sesión
-            </Link>{" "}
-            para calificar y dejar tu reseña.
-          </p>
-        )}
+        <ReviewForm
+          serviceId={service.id}
+          initialStars={user ? (ratingByUser.get(user.id) ?? null) : null}
+          initialComment={myComment?.content ?? ""}
+          isAuthenticated={!!user}
+        />
       </main>
     </div>
   );
