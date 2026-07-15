@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import {useState} from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { logout } from "@/app/actions/auth";
-import { ExplorarTab } from "./explorar-tab";
-import { FavoritosTab } from "./favoritos-tab";
-import { ResenasTab, type ReviewItem } from "./resenas-tab";
-import { SuscripcionTab } from "./suscripcion-tab";
-import { PerfilTab } from "./perfil-tab";
+import {logout} from "@/app/actions/auth";
+import {ExplorarTab} from "./explorar-tab";
+import {FavoritosTab} from "./favoritos-tab";
+import {ResenasTab, type ReviewItem} from "./resenas-tab";
+import {SuscripcionTab} from "./suscripcion-tab";
+import {PerfilTab} from "./perfil-tab";
 import type {
   Category,
   ServiceWithStats,
-  ClientRequestStatus,
+  SubscriptionStatus,
 } from "@/types/database";
 
 type Tab = "explorar" | "favoritos" | "resenas" | "suscripcion" | "perfil";
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+const TABS: {id: Tab; label: string; icon: React.ReactNode}[] = [
   {
     id: "explorar",
     label: "Explorar",
@@ -122,8 +122,21 @@ type Props = {
   exploreServices: ServiceWithStats[];
   favoriteServices: ServiceWithStats[];
   reviews: ReviewItem[];
-  ownService: { id: string; name: string; is_active: boolean } | null;
-  clientRequest: { status: ClientRequestStatus; message: string | null } | null;
+  ownService: {
+    id: string;
+    name: string;
+    is_active: boolean;
+    suspended_for_nonpayment: boolean;
+  } | null;
+  checkoutStatus: "success" | "cancel" | null;
+  paymentUpdateStatus: "success" | "cancel" | null;
+  cancellationStatus: "success" | null;
+  subscription: {
+    amount: number | null;
+    currency: string | null;
+    current_period_end: string | null;
+    status: SubscriptionStatus | null;
+  } | null;
 };
 
 export function DashboardShell({
@@ -137,9 +150,16 @@ export function DashboardShell({
   favoriteServices,
   reviews,
   ownService,
-  clientRequest,
+  checkoutStatus,
+  paymentUpdateStatus,
+  cancellationStatus,
+  subscription,
 }: Props) {
-  const [tab, setTab] = useState<Tab>("explorar");
+  const [tab, setTab] = useState<Tab>(
+    checkoutStatus || paymentUpdateStatus || cancellationStatus
+      ? "suscripcion"
+      : "explorar",
+  );
   const initial = (fullName || email).charAt(0).toUpperCase();
 
   return (
@@ -235,7 +255,7 @@ export function DashboardShell({
           </h1>
         </header>
 
-        <div className="flex-1 px-8 py-9" style={{ maxWidth: "1240px" }}>
+        <div className="flex-1 px-8 py-9" style={{maxWidth: "1240px"}}>
           {tab === "explorar" && (
             <ExplorarTab
               fullName={fullName}
@@ -249,7 +269,10 @@ export function DashboardShell({
             <SuscripcionTab
               role={role}
               ownService={ownService}
-              clientRequest={clientRequest}
+              checkoutStatus={checkoutStatus}
+              paymentUpdateStatus={paymentUpdateStatus}
+              cancellationStatus={cancellationStatus}
+              subscription={subscription}
             />
           )}
           {tab === "perfil" && (

@@ -113,7 +113,7 @@ export async function createService(_state: ServiceFormState, formData: FormData
     instagram,
     photos,
     user_id: user.id,
-    is_active: false, // explicit — overrides the column's `default true`; pending admin review
+    is_active: true,
   })
 
   if (error) {

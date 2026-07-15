@@ -59,7 +59,8 @@ export const config = {
      * - _next/static, _next/image, favicon.ico
      * - Archivos estáticos
      * - LA RUTA DE CONFIRMACIÓN
+     * - EL WEBHOOK DE STRIPE (no tiene cookies de sesión)
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth/confirm|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|auth/confirm|api/stripe/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

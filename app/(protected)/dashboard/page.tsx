@@ -4,7 +4,11 @@ import { DashboardShell } from './dashboard-shell'
 import type { ReviewItem } from './resenas-tab'
 import type { ServiceWithStats } from '@/types/database'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string; paymentUpdate?: string; cancellation?: string }>
+}) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -12,15 +16,20 @@ export default async function DashboardPage() {
   const profile = await getCurrentProfile()
   const fullName = (profile?.full_name || (user?.user_metadata?.full_name as string | undefined)) ?? ''
 
-  const [{ data: ownService }, { data: clientRequest }, { data: categories }, { data: servicesData }] = await Promise.all([
+  const { checkout, paymentUpdate, cancellation } = await searchParams
+  const checkoutStatus = checkout === 'success' ? 'success' : checkout === 'cancel' ? 'cancel' : null
+  const paymentUpdateStatus = paymentUpdate === 'success' ? 'success' : paymentUpdate === 'cancel' ? 'cancel' : null
+  const cancellationStatus = cancellation === 'success' ? 'success' : null
+
+  const [{ data: ownService }, { data: categories }, { data: servicesData }, { data: subscription }] = await Promise.all([
     profile?.role === 'client'
-      ? supabase.from('services').select('id, name, is_active').eq('user_id', user!.id).maybeSingle()
-      : Promise.resolve({ data: null }),
-    profile?.role === 'user'
-      ? supabase.from('client_requests').select('status, message').eq('user_id', user!.id).maybeSingle()
+      ? supabase.from('services').select('id, name, is_active, suspended_for_nonpayment').eq('user_id', user!.id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from('categories').select('id, name, slug, emoji, created_at').order('order', { ascending: true }),
     supabase.from('services').select('*, categories(name, slug, emoji)').eq('is_active', true),
+    profile?.role === 'client'
+      ? supabase.from('subscriptions').select('amount, currency, current_period_end, status').eq('user_id', user!.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   const serviceIds = (servicesData ?? []).map((s) => s.id)
@@ -79,7 +88,10 @@ export default async function DashboardPage() {
       favoriteServices={favoriteServices}
       reviews={reviews}
       ownService={ownService}
-      clientRequest={clientRequest}
+      checkoutStatus={checkoutStatus}
+      paymentUpdateStatus={paymentUpdateStatus}
+      cancellationStatus={cancellationStatus}
+      subscription={subscription}
     />
   )
 }

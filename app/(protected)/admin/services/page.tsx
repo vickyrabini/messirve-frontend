@@ -58,7 +58,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
                         s.is_active ? 'bg-celeste/10 text-celeste-deep' : 'bg-dorado/10 text-dorado-dark'
                       }`}
                     >
-                      {s.is_active ? 'Activo' : 'Pendiente'}
+                      {s.is_active ? 'Activo' : 'Desactivado'}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-right">

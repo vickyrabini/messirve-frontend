@@ -20,6 +20,7 @@ export type Service = {
   instagram: string | null
   photos: string[]
   is_active: boolean
+  suspended_for_nonpayment: boolean
   created_at: string
   updated_at: string
   categories?: Category
@@ -65,15 +66,25 @@ export type Profile = {
   created_at: string
 }
 
-export type ClientRequestStatus = 'pending' | 'approved' | 'rejected'
+export type SubscriptionStatus =
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'unpaid'
+  | 'paused'
 
-export type ClientRequest = {
+export type Subscription = {
   id: string
   user_id: string
-  status: ClientRequestStatus
-  message: string | null
-  reviewed_by: string | null
-  reviewed_at: string | null
+  stripe_customer_id: string
+  stripe_subscription_id: string | null
+  status: SubscriptionStatus
+  current_period_end: string | null
+  amount: number | null
+  currency: string | null
   created_at: string
   updated_at: string
 }
