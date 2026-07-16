@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import {useState} from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { logout } from "@/app/actions/auth";
-import { ExplorarTab } from "./explorar-tab";
-import { FavoritosTab } from "./favoritos-tab";
-import { ResenasTab, type ReviewItem } from "./resenas-tab";
-import { SuscripcionTab } from "./suscripcion-tab";
-import { PerfilTab } from "./perfil-tab";
+import {logout} from "@/app/actions/auth";
+import {ExplorarTab} from "./explorar-tab";
+import {FavoritosTab} from "./favoritos-tab";
+import {ResenasTab, type ReviewItem} from "./resenas-tab";
+import {SuscripcionTab} from "./suscripcion-tab";
+import {PerfilTab} from "./perfil-tab";
 import type {
   Category,
   ServiceWithStats,
-  ClientRequestStatus,
+  SubscriptionStatus,
 } from "@/types/database";
 
 type Tab = "explorar" | "favoritos" | "resenas" | "suscripcion" | "perfil";
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+const TABS: {id: Tab; label: string; icon: React.ReactNode}[] = [
   {
     id: "explorar",
     label: "Explorar",
@@ -122,8 +122,21 @@ type Props = {
   exploreServices: ServiceWithStats[];
   favoriteServices: ServiceWithStats[];
   reviews: ReviewItem[];
-  ownService: { id: string; name: string; is_active: boolean } | null;
-  clientRequest: { status: ClientRequestStatus; message: string | null } | null;
+  ownService: {
+    id: string;
+    name: string;
+    is_active: boolean;
+    suspended_for_nonpayment: boolean;
+  } | null;
+  checkoutStatus: "success" | "cancel" | null;
+  paymentUpdateStatus: "success" | "cancel" | null;
+  cancellationStatus: "success" | null;
+  subscription: {
+    amount: number | null;
+    currency: string | null;
+    current_period_end: string | null;
+    status: SubscriptionStatus | null;
+  } | null;
 };
 
 export function DashboardShell({
@@ -137,31 +150,73 @@ export function DashboardShell({
   favoriteServices,
   reviews,
   ownService,
-  clientRequest,
+  checkoutStatus,
+  paymentUpdateStatus,
+  cancellationStatus,
+  subscription,
 }: Props) {
-  const [tab, setTab] = useState<Tab>("explorar");
+  const [tab, setTab] = useState<Tab>(
+    checkoutStatus || paymentUpdateStatus || cancellationStatus
+      ? "suscripcion"
+      : "explorar",
+  );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const initial = (fullName || email).charAt(0).toUpperCase();
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-cream">
+    <div className="relative flex h-screen overflow-hidden bg-cream">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* SIDEBAR */}
-      <aside className="sticky top-0 flex h-screen w-[266px] shrink-0 flex-col bg-celeste-deep px-5 py-6">
-        <Link href="/" className="self-start">
-          <Image
-            src="/messirve-logo.png"
-            alt="Messirve"
-            width={138}
-            height={64}
-            className="h-14 w-auto"
-          />
-        </Link>
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[266px] shrink-0 flex-col bg-celeste-deep px-5 py-6 transition-transform duration-300 lg:static lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <Link href="/" className="self-start">
+            <Image
+              src="/messirve-logo.png"
+              alt="Messirve"
+              width={138}
+              height={64}
+              className="h-14 w-auto"
+            />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            className="text-white/70 transition-colors hover:text-white lg:hidden"
+            aria-label="Cerrar menú"
+          >
+            <svg
+              width={22}
+              height={22}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.2}
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
 
         <nav className="mt-9 flex flex-col gap-1.5">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                setSidebarOpen(false);
+              }}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
                 tab === t.id
                   ? "bg-white/10 text-white"
@@ -228,14 +283,36 @@ export function DashboardShell({
       </aside>
 
       {/* MAIN */}
-      <main className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-[78px] shrink-0 items-center justify-between border-b border-gris/40 bg-cream/90 px-8 backdrop-blur">
-          <h1 className="font-brand text-2xl uppercase text-ink">
-            {TAB_TITLES[tab]}
-          </h1>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="z-10 flex h-[78px] shrink-0 items-center gap-3 justify-between border-b border-gris/40 bg-cream/90 px-8 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="text-ink lg:hidden"
+              aria-label="Abrir menú"
+            >
+              <svg
+                width={22}
+                height={22}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.2}
+              >
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </button>
+            <h1 className="font-brand text-2xl uppercase text-ink">
+              {TAB_TITLES[tab]}
+            </h1>
+          </div>
         </header>
 
-        <div className="flex-1 px-8 py-9" style={{ maxWidth: "1240px" }}>
+        <div
+          className="flex-1 overflow-y-auto px-8 py-9"
+          style={{ maxWidth: "1240px" }}
+        >
           {tab === "explorar" && (
             <ExplorarTab
               fullName={fullName}
@@ -249,7 +326,10 @@ export function DashboardShell({
             <SuscripcionTab
               role={role}
               ownService={ownService}
-              clientRequest={clientRequest}
+              checkoutStatus={checkoutStatus}
+              paymentUpdateStatus={paymentUpdateStatus}
+              cancellationStatus={cancellationStatus}
+              subscription={subscription}
             />
           )}
           {tab === "perfil" && (
