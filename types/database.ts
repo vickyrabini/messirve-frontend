@@ -21,6 +21,7 @@ export type Service = {
   photos: string[]
   is_active: boolean
   suspended_for_nonpayment: boolean
+  approved: boolean
   created_at: string
   updated_at: string
   categories?: Category

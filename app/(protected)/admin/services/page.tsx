@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { toggleServiceActive } from '@/app/actions/admin'
+import { toggleServiceActive, approveService } from '@/app/actions/admin'
 import { Pagination } from '@/components/pagination'
 
 const PAGE_SIZE = 10
@@ -8,6 +8,7 @@ type ServiceRow = {
   id: string
   name: string
   is_active: boolean
+  approved: boolean
   user_id: string | null
   categories: { name: string; emoji: string | null } | null
 }
@@ -21,7 +22,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
   const admin = createAdminClient()
   const { data: services, count } = await admin
     .from('services')
-    .select('id, name, is_active, user_id, categories(name, emoji)', { count: 'exact' })
+    .select('id, name, is_active, approved, user_id, categories(name, emoji)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to)
     .returns<ServiceRow[]>()
@@ -62,16 +63,29 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
                     </span>
                   </td>
                   <td className="px-5 py-3 text-right">
-                    <form action={toggleServiceActive}>
-                      <input type="hidden" name="serviceId" value={s.id} />
-                      <input type="hidden" name="isActive" value={String(s.is_active)} />
-                      <button
-                        type="submit"
-                        className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
-                      >
-                        {s.is_active ? 'Desactivar' : 'Activar'}
-                      </button>
-                    </form>
+                    <div className="flex justify-end gap-2">
+                      {!s.approved && (
+                        <form action={approveService}>
+                          <input type="hidden" name="serviceId" value={s.id} />
+                          <button
+                            type="submit"
+                            className="cursor-pointer rounded-full border border-celeste bg-celeste/10 px-3.5 py-1.5 text-xs font-semibold text-celeste-deep transition-colors hover:bg-celeste/20"
+                          >
+                            Aprobar
+                          </button>
+                        </form>
+                      )}
+                      <form action={toggleServiceActive}>
+                        <input type="hidden" name="serviceId" value={s.id} />
+                        <input type="hidden" name="isActive" value={String(s.is_active)} />
+                        <button
+                          type="submit"
+                          className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                        >
+                          {s.is_active ? 'Desactivar' : 'Activar'}
+                        </button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}

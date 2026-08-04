@@ -52,8 +52,20 @@ export async function createService(_state: ServiceFormState, formData: FormData
 
   // Defense in depth — verify the role server-side, never trust the page-level gate alone
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'client') {
+  if (profile?.role !== 'client' && profile?.role !== 'user') {
     return { error: 'No tenés permiso para crear servicios' }
+  }
+
+  // A 'client' already paid — their service publishes immediately, same as always.
+  // A 'user' is going through the new flow: service starts pending admin approval, publishes after payment.
+  const isAlreadyClient = profile.role === 'client'
+
+  // Defense in depth — the page-level redirect (services/new/page.tsx) is bypassable via
+  // double-submit or multiple tabs; without this, a duplicate row breaks every .maybeSingle()
+  // lookup keyed on user_id downstream (checkout, webhook activation, dashboard).
+  const { data: ownService } = await supabase.from('services').select('id').eq('user_id', user.id).maybeSingle()
+  if (ownService) {
+    return { error: 'Ya tenés un servicio publicado' }
   }
 
   const categoryId = (formData.get('categoryId') as string)?.trim()
@@ -82,9 +94,12 @@ export async function createService(_state: ServiceFormState, formData: FormData
     }
   }
 
+  // Admin client — a 'user' isn't covered by the RLS insert policy (role = 'client' only), and we've
+  // already verified the role server-side above. Same pattern as registerClient. Also needed for storage.
+  const admin = createAdminClient()
+
   const photos: string[] = []
   if (photoFiles.length > 0) {
-    const admin = createAdminClient()
     const slug = toSlug(name)
 
     for (const file of photoFiles) {
@@ -101,7 +116,7 @@ export async function createService(_state: ServiceFormState, formData: FormData
     }
   }
 
-  const { error } = await supabase.from('services').insert({
+  const { error } = await admin.from('services').insert({
     category_id: categoryId,
     name,
     description,
@@ -113,7 +128,8 @@ export async function createService(_state: ServiceFormState, formData: FormData
     instagram,
     photos,
     user_id: user.id,
-    is_active: true,
+    is_active: isAlreadyClient,
+    approved: isAlreadyClient,
   })
 
   if (error) {

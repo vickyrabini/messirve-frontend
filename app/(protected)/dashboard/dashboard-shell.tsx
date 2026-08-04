@@ -127,6 +127,7 @@ type Props = {
     name: string;
     is_active: boolean;
     suspended_for_nonpayment: boolean;
+    approved: boolean;
   } | null;
   checkoutStatus: "success" | "cancel" | null;
   paymentUpdateStatus: "success" | "cancel" | null;

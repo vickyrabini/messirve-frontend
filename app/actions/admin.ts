@@ -137,3 +137,17 @@ export async function toggleServiceActive(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/services')
 }
+
+export async function approveService(formData: FormData): Promise<void> {
+  const profile = await getCurrentProfile()
+  if (!profile || profile.role !== 'admin') return
+
+  const serviceId = formData.get('serviceId') as string
+  if (!serviceId) return
+
+  const admin = createAdminClient()
+  // Solo marca `approved` — la visibilidad pública (`is_active`) recién se activa cuando el cliente paga.
+  await admin.from('services').update({ approved: true }).eq('id', serviceId)
+
+  revalidatePath('/admin/services')
+}
