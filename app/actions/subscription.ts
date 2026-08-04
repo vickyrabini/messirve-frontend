@@ -22,6 +22,16 @@ export async function createCheckoutSession(_state: CheckoutState, _formData: Fo
     return { error: 'No podés iniciar este proceso' }
   }
 
+  // Pagar ahora requiere haber cargado el servicio primero y que un admin lo haya aprobado —
+  // nunca confiar solo en el gate de la UI (mirrors suscripcion-tab.tsx)
+  const { data: ownService } = await supabase.from('services').select('approved').eq('user_id', user.id).maybeSingle()
+  if (!ownService) {
+    return { error: 'Primero tenés que cargar tu servicio' }
+  }
+  if (!ownService.approved) {
+    return { error: 'Tu servicio todavía está en revisión. Te avisamos cuando esté aprobado.' }
+  }
+
   // Re-subscribing after a prior cancellation reuses the same Stripe customer
   const { data: existingSubscription } = await supabase
     .from('subscriptions')

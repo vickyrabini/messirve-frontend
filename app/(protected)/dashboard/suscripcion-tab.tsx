@@ -10,7 +10,7 @@ import type { SubscriptionStatus } from '@/types/database'
 
 type Props = {
   role: 'admin' | 'client' | 'user'
-  ownService: { id: string; name: string; is_active: boolean; suspended_for_nonpayment: boolean } | null
+  ownService: { id: string; name: string; is_active: boolean; suspended_for_nonpayment: boolean; approved: boolean } | null
   checkoutStatus: 'success' | 'cancel' | null
   paymentUpdateStatus: 'success' | 'cancel' | null
   cancellationStatus: 'success' | null
@@ -80,15 +80,16 @@ export function SuscripcionTab({
         </div>
       )}
 
-      {role === 'client' && !ownService && (
+      {(role === 'client' || role === 'user') && !ownService && (
         <div className="relative">
           <SunDecor className="pointer-events-none absolute -bottom-24 right-0 h-[420px] w-[420px] opacity-10" />
           <div className="max-w-2xl">
             <div className="relative rounded-[20px] border border-gris/40 bg-white px-8 py-12 text-center sm:px-10">
               <SunDecor className="mx-auto mb-5 h-16 w-16" />
               <p className="mx-auto max-w-[420px] text-[17px] leading-relaxed text-muted">
-                Todavía no tenés un servicio publicado. Sumate como emprendedor para aparecer en búsquedas y
-                gestionar tu suscripción acá.
+                {role === 'client'
+                  ? 'Todavía no tenés un servicio publicado. Sumate como emprendedor para aparecer en búsquedas y gestionar tu suscripción acá.'
+                  : 'Cargá tu servicio para empezar. Lo revisamos y, una vez aprobado, vas a poder pagar la suscripción para que quede visible.'}
               </p>
               <Link
                 href="/dashboard/services/new"
@@ -136,7 +137,41 @@ export function SuscripcionTab({
         </div>
       )}
 
-      {role !== 'client' && <SubscribeCard checkoutStatus={checkoutStatus} />}
+      {role === 'user' && ownService && !ownService.approved && (
+        <div className="relative">
+          <SunDecor className="pointer-events-none absolute -bottom-24 right-0 h-[420px] w-[420px] opacity-10" />
+          <div className="max-w-2xl">
+            <div className="relative rounded-[20px] border border-gris/40 bg-white px-8 py-12 text-center sm:px-10">
+              <SunDecor className="mx-auto mb-5 h-16 w-16" />
+              <p className="font-brand text-2xl uppercase text-ink">{ownService.name}</p>
+              <p className="mx-auto mt-3 max-w-[420px] text-[17px] leading-relaxed text-muted">
+                Tu servicio está en revisión. Te avisamos en cuanto el equipo de Messirve lo apruebe para que puedas
+                pagar la suscripción y quede visible.
+              </p>
+              <span className="mt-5 inline-flex items-center rounded-full bg-dorado/15 px-4 py-1.5 text-[13.5px] font-semibold text-dorado-dark">
+                Pendiente de aprobación
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {role === 'user' && ownService && ownService.approved && (
+        <div className="max-w-2xl">
+          <div className="mb-6 rounded-[20px] border border-gris/40 bg-white p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-brand text-2xl uppercase text-ink">{ownService.name}</p>
+                <p className="mt-1 text-[15px] text-muted">Ya podés pagar la suscripción para que quede visible</p>
+              </div>
+              <span className="rounded-full bg-[#E7F1E9] px-4 py-1.5 text-[13.5px] font-semibold text-[#2E7D46]">
+                Aprobado
+              </span>
+            </div>
+          </div>
+          <SubscribeCard checkoutStatus={checkoutStatus} />
+        </div>
+      )}
     </div>
   )
 }

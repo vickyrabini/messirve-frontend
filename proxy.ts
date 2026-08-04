@@ -33,7 +33,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isAuthRoute = ['/login', '/register', '/forgot-password'].includes(pathname)
+  const isAuthRoute = ['/login', '/register', '/register-client', '/forgot-password'].includes(pathname)
   const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
 
   if (!user && isProtectedRoute) {

@@ -22,8 +22,12 @@ export default async function DashboardPage({
   const cancellationStatus = cancellation === 'success' ? 'success' : null
 
   const [{ data: ownService }, { data: categories }, { data: servicesData }, { data: subscription }] = await Promise.all([
-    profile?.role === 'client'
-      ? supabase.from('services').select('id, name, is_active, suspended_for_nonpayment').eq('user_id', user!.id).maybeSingle()
+    profile?.role === 'client' || profile?.role === 'user'
+      ? supabase
+          .from('services')
+          .select('id, name, is_active, suspended_for_nonpayment, approved')
+          .eq('user_id', user!.id)
+          .maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from('categories').select('id, name, slug, emoji, created_at').order('order', { ascending: true }),
     supabase.from('services').select('*, categories(name, slug, emoji)').eq('is_active', true),

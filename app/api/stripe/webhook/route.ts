@@ -130,6 +130,22 @@ export async function POST(request: NextRequest) {
 
         const { error: roleError } = await admin.from('profiles').update({ role: 'client' }).eq('id', userId)
         if (roleError) throw roleError
+
+        // If the user came from /register-client, their service already exists and was approved
+        // by an admin ahead of payment — make it visible now that the subscription is active.
+        const { data: pendingOwnedService } = await admin
+          .from('services')
+          .select('id, approved, is_active')
+          .eq('user_id', userId)
+          .maybeSingle()
+
+        if (pendingOwnedService?.approved && !pendingOwnedService.is_active) {
+          const { error: activateError } = await admin
+            .from('services')
+            .update({ is_active: true })
+            .eq('id', pendingOwnedService.id)
+          if (activateError) throw activateError
+        }
         break
       }
 
