@@ -82,6 +82,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         </form>
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
@@ -113,6 +114,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
               ))}
             </tbody>
           </table>
+          </div>
 
           {users.length === 0 && <p className="px-5 py-8 text-center text-sm text-muted">No se encontraron usuarios</p>}
 

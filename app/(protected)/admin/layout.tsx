@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/profile'
-import { AdminNav } from './admin-nav'
+import { AdminShell } from './admin-nav'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile()
@@ -8,10 +8,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/dashboard')
   }
 
-  return (
-    <div className="flex min-h-screen bg-cream">
-      <AdminNav />
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
-  )
+  return <AdminShell>{children}</AdminShell>
 }
