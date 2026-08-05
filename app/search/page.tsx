@@ -128,7 +128,7 @@ export default async function SearchPage({
     <div className="min-h-screen bg-cream">
       <header className="border-b border-gris/40 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/">
+          <Link href={user ? "/dashboard" : "/"}>
             <Image
               src="/messirve-logo.png"
               alt="Messirve Barcelona"

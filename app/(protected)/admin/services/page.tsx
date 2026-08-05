@@ -35,6 +35,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
       <p className="mt-1 text-sm text-muted">Activá los servicios pendientes de revisión o desactivá los publicados</p>
 
         <div className="mt-8 overflow-hidden rounded-2xl border border-gris/30 bg-white">
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
@@ -91,6 +92,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
               ))}
             </tbody>
           </table>
+          </div>
 
           {(services ?? []).length === 0 && <p className="px-5 py-8 text-center text-sm text-muted">No hay servicios cargados</p>}
 
