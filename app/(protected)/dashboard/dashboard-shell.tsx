@@ -285,7 +285,7 @@ export function DashboardShell({
 
       {/* MAIN */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="z-10 flex h-[78px] shrink-0 items-center gap-3 justify-between border-b border-gris/40 bg-cream/90 px-8 backdrop-blur">
+        <header className="z-10 flex h-[78px] shrink-0 items-center gap-3 justify-between border-b border-gris/40 bg-cream/90 px-5 sm:px-8 backdrop-blur">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -311,7 +311,7 @@ export function DashboardShell({
         </header>
 
         <div
-          className="flex-1 overflow-y-auto px-8 py-9"
+          className="flex-1 overflow-y-auto px-5 py-9 sm:px-8"
           style={{ maxWidth: "1240px" }}
         >
           {tab === "explorar" && (

@@ -108,7 +108,7 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
   }, []);
 
   return (
-    <div className="font-sans text-ink antialiased overflow-x-hidden">
+    <div className="font-sans text-ink antialiased">
       {/* ============ NAV ============ */}
       <header
         id="nav"
@@ -119,7 +119,10 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
             ref={navShellRef}
             className="mt-3 flex items-center justify-between rounded-2xl border border-transparent px-4 py-2.5 transition-all duration-300"
           >
-            <a href="#top" className="flex items-center gap-2 shrink-0">
+            <Link
+              href={isAuthenticated ? "/dashboard" : "#top"}
+              className="flex items-center gap-2 shrink-0"
+            >
               <Image
                 src="/messirve-logo.png"
                 alt="Messirve Barcelona"
@@ -127,7 +130,7 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
                 height={44}
                 className="h-11 w-auto"
               />
-            </a>
+            </Link>
 
             <div className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-ink/80">
               <a href="#como" className="link-underline hover:text-ink">
@@ -169,7 +172,7 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
           }}
         />
 
-        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-8 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
           <div data-stagger>
             <span className="reveal inline-block text-[15px] font-bold uppercase tracking-[0.16em] text-white/90">
               Argentinos &amp; uruguayos en Barcelona
@@ -207,7 +210,7 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
                 type="text"
                 name="q"
                 placeholder="¿Qué estás buscando? Empanadas, gestor..."
-                className="flex-1 border-none bg-transparent text-[17px] text-ink outline-none placeholder:text-muted/70"
+                className="min-w-0 flex-1 border-none bg-transparent text-[17px] text-ink outline-none placeholder:text-muted/70"
               />
               <button
                 type="submit"

@@ -58,7 +58,7 @@ export function ExplorarTab({ fullName, categories, services }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Empanadas, gestor, mudanzas, tango…"
-              className="flex-1 border-none bg-transparent text-[16px] text-ink outline-none placeholder:text-muted/70"
+              className="min-w-0 flex-1 border-none bg-transparent text-[16px] text-ink outline-none placeholder:text-muted/70"
             />
           </div>
         </div>
