@@ -20,7 +20,7 @@ export function SubscribeCard({ checkoutStatus }: Props) {
         <div className="relative rounded-[20px] border border-gris/30 bg-white px-8 py-12 text-center sm:px-10">
           <SunDecor className="mx-auto mb-5 h-16 w-16" />
           <p className="mx-auto max-w-[420px] text-[17px] leading-relaxed text-muted">
-            Sumate como emprendedor para aparecer en búsquedas y gestionar tu suscripción acá.
+            Confirmá el pago de tu suscripción mensual para que tu servicio quede visible en las búsquedas.
           </p>
 
           <form action={formAction} className="mx-auto mt-6 max-w-[420px] space-y-3 text-center">
@@ -37,7 +37,7 @@ export function SubscribeCard({ checkoutStatus }: Props) {
               disabled={isPending}
               className="cursor-pointer rounded-full bg-dorado px-8 py-4 font-brand text-[15px] uppercase tracking-wide text-ink transition-all hover:-translate-y-0.5 hover:bg-dorado-light disabled:opacity-60"
             >
-              {isPending ? 'Redirigiendo...' : 'Suscribirme'}
+              {isPending ? 'Redirigiendo...' : 'Realizar pago'}
             </button>
           </form>
         </div>
