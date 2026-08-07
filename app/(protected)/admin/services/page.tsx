@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toggleServiceActive, approveService } from '@/app/actions/admin'
 import { Pagination } from '@/components/pagination'
+import type { SubscriptionStatus } from '@/types/database'
 
 const PAGE_SIZE = 10
 
@@ -12,6 +13,18 @@ type ServiceRow = {
   user_id: string | null
   categories: { name: string; emoji: string | null } | null
 }
+
+const paymentBadge: Record<SubscriptionStatus, { label: string; className: string }> = {
+  active: { label: 'Pagado', className: 'bg-[#E7F1E9] text-[#2E7D46]' },
+  trialing: { label: 'Pagado', className: 'bg-[#E7F1E9] text-[#2E7D46]' },
+  past_due: { label: 'Pago vencido', className: 'bg-red-50 text-red-500' },
+  unpaid: { label: 'Pago vencido', className: 'bg-red-50 text-red-500' },
+  canceled: { label: 'Cancelado', className: 'bg-gris/20 text-muted' },
+  incomplete: { label: 'Pendiente', className: 'bg-dorado/15 text-dorado-dark' },
+  incomplete_expired: { label: 'Pendiente', className: 'bg-dorado/15 text-dorado-dark' },
+  paused: { label: 'Pendiente', className: 'bg-dorado/15 text-dorado-dark' },
+}
+const NO_PAYMENT = { label: 'Sin pago', className: 'bg-gris/20 text-muted' }
 
 export default async function AdminServicesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { page: pageParam } = await searchParams
@@ -29,6 +42,12 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE))
 
+  const userIds = [...new Set((services ?? []).map((s) => s.user_id).filter((id): id is string => id !== null))]
+  const { data: subs } = userIds.length
+    ? await admin.from('subscriptions').select('user_id, status').in('user_id', userIds)
+    : { data: [] }
+  const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]))
+
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
       <h1 className="font-brand uppercase text-2xl text-ink">Gestionar servicios</h1>
@@ -42,6 +61,7 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
                 <th className="px-5 py-3 font-medium">Nombre</th>
                 <th className="px-5 py-3 font-medium">Categoría</th>
                 <th className="px-5 py-3 font-medium">Creado por</th>
+                <th className="px-5 py-3 font-medium">Pago</th>
                 <th className="px-5 py-3 font-medium">Estado</th>
                 <th className="px-5 py-3 font-medium"></th>
               </tr>
@@ -54,6 +74,21 @@ export default async function AdminServicesPage({ searchParams }: { searchParams
                     {s.categories ? `${s.categories.emoji ? `${s.categories.emoji} ` : ''}${s.categories.name}` : '—'}
                   </td>
                   <td className="px-5 py-3 text-muted">{s.user_id ? 'Usuario' : 'Admin (panel)'}</td>
+                  <td className="px-5 py-3">
+                    {s.user_id === null ? (
+                      <span className="text-muted">—</span>
+                    ) : (
+                      (() => {
+                        const status = statusByUser.get(s.user_id)
+                        const badge = status ? paymentBadge[status] : NO_PAYMENT
+                        return (
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}>
+                            {badge.label}
+                          </span>
+                        )
+                      })()
+                    )}
+                  </td>
                   <td className="px-5 py-3">
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
