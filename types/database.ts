@@ -64,6 +64,7 @@ export type Profile = {
   full_name: string | null
   avatar_url: string | null
   role: 'admin' | 'client' | 'user'
+  account_type: 'free' | 'paid'
   created_at: string
 }
 
@@ -88,4 +89,18 @@ export type Subscription = {
   currency: string | null
   created_at: string
   updated_at: string
+}
+
+export type ClientInviteStatus = 'pending' | 'used' | 'expired' | 'revoked'
+
+export type ClientInvite = {
+  id: string
+  email: string
+  token: string
+  status: ClientInviteStatus
+  created_by: string
+  used_by: string | null
+  expires_at: string
+  used_at: string | null
+  created_at: string
 }
