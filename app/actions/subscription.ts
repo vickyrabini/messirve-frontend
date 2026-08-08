@@ -2,7 +2,9 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getStripe } from '@/lib/stripe'
+import { deleteOwnedService } from '@/lib/delete-owned-service'
 
 export type CheckoutState = { error: string | null }
 
@@ -115,6 +117,20 @@ export async function cancelSubscription(_state: CancelState, _formData: FormDat
     })
     return { error: 'No se pudo cancelar la suscripción. Intentá de nuevo.' }
   }
+
+  // Stripe ya canceló — de acá no hay vuelta atrás. El webhook (customer.subscription.deleted)
+  // hace esta misma limpieza, pero de forma asíncrona: si redirigiéramos ahora sin esperarlo,
+  // el dashboard puede recargar antes de que llegue y mostrar la suscripción como si siguiera
+  // activa. Hacemos la limpieza acá mismo, síncrona — el webhook queda como red de seguridad
+  // para cancelaciones que no pasan por este botón (deleteOwnedService no rompe si se llama dos veces).
+  const admin = createAdminClient()
+  try {
+    await deleteOwnedService(admin, user.id)
+  } catch (err) {
+    console.log('[cancelSubscription] cleanup error:', { message: (err as Error)?.message })
+  }
+  await admin.from('profiles').update({ role: 'user' }).eq('id', user.id)
+  await admin.from('subscriptions').update({ status: 'canceled', updated_at: new Date().toISOString() }).eq('user_id', user.id)
 
   redirect('/dashboard?tab=suscripcion&cancellation=success')
 }
