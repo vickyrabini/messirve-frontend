@@ -89,8 +89,13 @@ export function SuscripcionTab({
               <p className="mx-auto max-w-[420px] text-[17px] leading-relaxed text-muted">
                 {role === 'client'
                   ? 'Todavía no tenés un servicio publicado. Sumate como emprendedor para aparecer en búsquedas y gestionar tu suscripción acá.'
-                  : 'Cargá tu servicio para empezar. Lo revisamos y, una vez aprobado, vas a poder pagar la suscripción para que quede visible.'}
+                  : 'Cargá tu servicio para empezar. Lo revisamos y, una vez aprobado, pagás la suscripción y aparece en los buscadores.'}
               </p>
+              {role === 'user' && (
+                <span className="mx-auto mt-4 flex w-fit items-center gap-1.5 rounded-full bg-dorado/15 px-3.5 py-1.5 text-[13.5px] font-bold text-dorado-dark">
+                  Suscripción mensual: 18€
+                </span>
+              )}
               <Link
                 href="/dashboard/services/new"
                 className="mt-6 inline-flex items-center rounded-full bg-dorado px-8 py-4 font-brand text-[15px] uppercase tracking-wide text-ink transition-all hover:-translate-y-0.5 hover:bg-dorado-light"
