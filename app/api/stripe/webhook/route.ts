@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { deleteOwnedService } from '@/lib/delete-owned-service'
 import type { SubscriptionStatus } from '@/types/database'
 
 const FULL_CLEANUP_STATUSES: SubscriptionStatus[] = ['canceled']
@@ -190,40 +191,7 @@ export async function POST(request: NextRequest) {
         if (upsertError) throw upsertError
 
         if (FULL_CLEANUP_STATUSES.includes(status)) {
-          const { data: ownedService } = await admin
-            .from('services')
-            .select('id, photos')
-            .eq('user_id', userId)
-            .maybeSingle()
-
-          if (ownedService) {
-            const { error: commentsError } = await admin.from('service_comments').delete().eq('service_id', ownedService.id)
-            if (commentsError) throw commentsError
-
-            const { error: ratingsError } = await admin.from('service_ratings').delete().eq('service_id', ownedService.id)
-            if (ratingsError) throw ratingsError
-
-            const { error: likesError } = await admin.from('service_likes').delete().eq('service_id', ownedService.id)
-            if (likesError) throw likesError
-
-            const photos = (ownedService.photos as string[]) ?? []
-            if (photos.length > 0) {
-              const storageBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/service-photos/`
-              const paths = photos.filter((url) => url.startsWith(storageBase)).map((url) => url.slice(storageBase.length))
-              if (paths.length > 0) {
-                const { error: storageError } = await admin.storage.from('service-photos').remove(paths)
-                if (storageError) {
-                  console.log('[stripe webhook] failed to remove service photos:', {
-                    message: storageError.message,
-                    serviceId: ownedService.id,
-                  })
-                }
-              }
-            }
-
-            const { error: deleteServiceError } = await admin.from('services').delete().eq('id', ownedService.id)
-            if (deleteServiceError) throw deleteServiceError
-          }
+          await deleteOwnedService(admin, userId)
 
           const { error: roleError } = await admin.from('profiles').update({ role: 'user' }).eq('id', userId)
           if (roleError) throw roleError

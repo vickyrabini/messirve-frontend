@@ -338,6 +338,8 @@ export function DashboardShell({
               fullName={fullName}
               email={email}
               memberSince={memberSince}
+              role={role}
+              hasActiveSubscription={!!subscription}
             />
           )}
         </div>

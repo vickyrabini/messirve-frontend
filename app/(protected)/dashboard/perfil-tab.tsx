@@ -1,14 +1,18 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { updateProfile, deleteAccount } from '@/app/actions/profile'
+import { updateProfile, deleteAccount, type DeleteAccountState } from '@/app/actions/profile'
+import { CancelSubscriptionButton } from './cancel-subscription-button'
 
 const initialState = { error: null }
+const initialDeleteState: DeleteAccountState = { error: null }
 
 type Props = {
   fullName: string
   email: string
   memberSince: string
+  role: 'admin' | 'client' | 'user'
+  hasActiveSubscription: boolean
 }
 
 function formatMemberSince(iso: string) {
@@ -17,9 +21,17 @@ function formatMemberSince(iso: string) {
   return `Miembro desde ${label} · Barcelona`
 }
 
-export function PerfilTab({ fullName, email, memberSince }: Props) {
+export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscription }: Props) {
   const [state, formAction, isPending] = useActionState(updateProfile, initialState)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleteState, deleteFormAction, isDeletePending] = useActionState(deleteAccount, initialDeleteState)
+
+  const isClient = role === 'client'
+  const deleteDescription = isClient
+    ? hasActiveSubscription
+      ? 'Se cancela tu suscripción (no se te vuelve a cobrar), se elimina tu servicio publicado con sus reseñas y likes, y se borra tu cuenta por completo: perfil, tus likes, calificaciones y comentarios. No se puede deshacer.'
+      : 'Se elimina tu servicio publicado con sus reseñas y likes, y se borra tu cuenta por completo: perfil, tus likes, calificaciones y comentarios. No se puede deshacer.'
+    : 'Se borran tu perfil, favoritos, reseñas y cualquier servicio que hayas cargado. No se puede deshacer.'
 
   return (
     <div className="max-w-2xl">
@@ -75,11 +87,24 @@ export function PerfilTab({ fullName, email, memberSince }: Props) {
         </form>
       </div>
 
+      {isClient && hasActiveSubscription && (
+        <div className="mt-5 rounded-[20px] border border-gris/40 bg-white p-7">
+          <p className="text-[16px] font-semibold text-ink">Eliminar suscripción</p>
+          <p className="mt-1 text-[14px] text-muted">
+            Cancelás el pago mensual y se elimina tu servicio publicado (con sus reseñas y likes). Tu cuenta se
+            mantiene como usuario — tus propios favoritos y comentarios en otros servicios no se pierden.
+          </p>
+          <div className="mt-4">
+            <CancelSubscriptionButton />
+          </div>
+        </div>
+      )}
+
       <div className="mt-5 rounded-[20px] border border-gris/40 bg-white p-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-[16px] font-semibold text-ink">Eliminar cuenta</p>
-            <p className="mt-1 text-[14px] text-muted">Se borran tu perfil, favoritos y reseñas. No se puede deshacer.</p>
+            <p className="mt-1 text-[14px] text-muted">{deleteDescription}</p>
           </div>
 
           {confirmingDelete ? (
@@ -91,12 +116,13 @@ export function PerfilTab({ fullName, email, memberSince }: Props) {
               >
                 Cancelar
               </button>
-              <form action={deleteAccount}>
+              <form action={deleteFormAction}>
                 <button
                   type="submit"
-                  className="shrink-0 rounded-full bg-[#A63B24] px-6 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#8f2f1b]"
+                  disabled={isDeletePending}
+                  className="shrink-0 rounded-full bg-[#A63B24] px-6 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#8f2f1b] disabled:opacity-60"
                 >
-                  Sí, eliminar definitivamente
+                  {isDeletePending ? 'Eliminando...' : 'Sí, eliminar definitivamente'}
                 </button>
               </form>
             </div>
@@ -110,6 +136,9 @@ export function PerfilTab({ fullName, email, memberSince }: Props) {
             </button>
           )}
         </div>
+        {deleteState?.error && (
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-[13px] font-semibold text-red-500">{deleteState.error}</p>
+        )}
       </div>
     </div>
   )

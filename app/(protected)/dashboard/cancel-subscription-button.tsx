@@ -25,8 +25,9 @@ export function CancelSubscriptionButton() {
     <div className="space-y-3">
       {state.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>}
       <p className="text-sm font-semibold text-ink">
-        ¿Estás seguro? Esto cancela tu suscripción de inmediato y elimina tu servicio publicado junto con sus reseñas y
-        likes. No se puede deshacer.
+        ¿Estás seguro? Se cancela tu suscripción de inmediato, se elimina tu servicio publicado junto con sus reseñas
+        y likes, y tu cuenta pasa a ser un usuario normal — tus propios likes y comentarios en otros servicios se
+        mantienen. No se puede deshacer.
       </p>
       <div className="flex gap-3">
         <form action={formAction}>
