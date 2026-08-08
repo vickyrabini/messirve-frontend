@@ -12,6 +12,16 @@ function isValidEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
+// La extensión sale de un mapeo fijo por MIME type, nunca del nombre de archivo que
+// manda el cliente (falseable) — cierra la vía de subir bytes arbitrarios con una
+// extensión engañosa al bucket público service-photos.
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
+
 function toSlug(str: string): string {
   return str
     .normalize('NFD')
@@ -102,7 +112,11 @@ export async function registerClient(_state: RegisterClientState, formData: Form
   if (photoFiles.length > 0) {
     const slug = toSlug(name)
     for (const file of photoFiles) {
-      const ext = file.name.split('.').pop() ?? 'jpg'
+      const ext = MIME_TO_EXT[file.type]
+      if (!ext) {
+        await admin.auth.admin.deleteUser(newUserId)
+        return { error: 'Formato de imagen no soportado (usá JPG, PNG, WEBP o GIF)' }
+      }
       const path = `${slug}/${randomUUID()}.${ext}`
 
       const { error: uploadError } = await admin.storage.from('service-photos').upload(path, file, { contentType: file.type })
