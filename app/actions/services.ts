@@ -78,7 +78,6 @@ export async function createService(_state: ServiceFormState, formData: FormData
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const priceInfo = (formData.get('priceInfo') as string)?.trim() || null
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
@@ -122,7 +121,6 @@ export async function createService(_state: ServiceFormState, formData: FormData
     description,
     address,
     city,
-    price_info: priceInfo,
     phone,
     website,
     instagram,
@@ -165,7 +163,6 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const priceInfo = (formData.get('priceInfo') as string)?.trim() || null
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
@@ -204,7 +201,7 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
 
   const { error } = await supabase
     .from('services')
-    .update({ category_id: categoryId, name, description, address, city, price_info: priceInfo, phone, website, instagram, photos })
+    .update({ category_id: categoryId, name, description, address, city, phone, website, instagram, photos })
     .eq('id', serviceId)
 
   if (error) return { error: 'No se pudo actualizar el servicio. Intentá de nuevo.' }
