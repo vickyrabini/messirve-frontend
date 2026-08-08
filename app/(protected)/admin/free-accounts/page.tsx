@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revokeInvite, convertFreeAccountToPaid } from '@/app/actions/free-accounts'
+import { SubmitButton } from './submit-button'
 import type { ClientInvite } from '@/types/database'
 
 const statusBadge: Record<ClientInvite['status'], { label: string; className: string }> = {
@@ -10,34 +11,47 @@ const statusBadge: Record<ClientInvite['status'], { label: string; className: st
   revoked: { label: 'Revocada', className: 'bg-gris/20 text-muted' },
 }
 
+const accountBadge: Record<'free' | 'paid', { label: string; className: string }> = {
+  free: { label: 'Gratuita', className: 'bg-celeste/10 text-celeste-deep' },
+  paid: { label: 'Pasada a pago', className: 'bg-dorado/15 text-dorado-dark' },
+}
+
 type FreeClientRow = {
   id: string
   email: string
   fullName: string | null
+  accountType: 'free' | 'paid'
   service: { id: string; name: string; is_active: boolean } | null
 }
 
 export default async function AdminFreeAccountsPage() {
   const admin = createAdminClient()
 
-  const [{ data: invites }, { data: freeProfiles }, { data: authData }] = await Promise.all([
+  const [{ data: invites }, { data: authData }] = await Promise.all([
     admin.from('client_invites').select('*').order('created_at', { ascending: false }).returns<ClientInvite[]>(),
-    admin.from('profiles').select('id, full_name').eq('account_type', 'free'),
     admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ])
 
-  const freeUserIds = (freeProfiles ?? []).map((p) => p.id)
-  const { data: services } = freeUserIds.length
-    ? await admin.from('services').select('id, name, is_active, user_id').in('user_id', freeUserIds)
+  // Toda cuenta que nació de una invitación gratuita — sea que siga gratis o ya haya
+  // pasado a pago — para que la fila quede como registro histórico en vez de desaparecer.
+  const usedByIds = [...new Set((invites ?? []).filter((i) => i.status === 'used' && i.used_by).map((i) => i.used_by as string))]
+
+  const { data: freeOriginProfiles } = usedByIds.length
+    ? await admin.from('profiles').select('id, full_name, account_type').in('id', usedByIds)
+    : { data: [] }
+
+  const { data: services } = usedByIds.length
+    ? await admin.from('services').select('id, name, is_active, user_id').in('user_id', usedByIds)
     : { data: [] }
 
   const emailById = new Map((authData?.users ?? []).map((u) => [u.id, u.email ?? '—']))
   const serviceByUserId = new Map((services ?? []).map((s) => [s.user_id, s]))
 
-  const freeClients: FreeClientRow[] = (freeProfiles ?? []).map((p) => ({
+  const freeClients: FreeClientRow[] = (freeOriginProfiles ?? []).map((p) => ({
     id: p.id,
     email: emailById.get(p.id) ?? '—',
     fullName: p.full_name,
+    accountType: p.account_type,
     service: serviceByUserId.get(p.id) ?? null,
   }))
 
@@ -87,12 +101,12 @@ export default async function AdminFreeAccountsPage() {
                       {invite.status === 'pending' && !isExpired && (
                         <form action={revokeInvite}>
                           <input type="hidden" name="inviteId" value={invite.id} />
-                          <button
-                            type="submit"
+                          <SubmitButton
+                            pendingLabel="Revocando..."
                             className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
                           >
                             Revocar
-                          </button>
+                          </SubmitButton>
                         </form>
                       )}
                     </td>
@@ -114,28 +128,37 @@ export default async function AdminFreeAccountsPage() {
                 <th className="px-5 py-3 font-medium">Nombre</th>
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Servicio</th>
+                <th className="px-5 py-3 font-medium">Estado</th>
                 <th className="px-5 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody>
-              {freeClients.map((c) => (
-                <tr key={c.id} className="border-b border-gris/20 last:border-0">
-                  <td className="px-5 py-3 font-medium text-ink">{c.fullName ?? '—'}</td>
-                  <td className="px-5 py-3 text-muted">{c.email}</td>
-                  <td className="px-5 py-3 text-muted">{c.service?.name ?? '—'}</td>
-                  <td className="px-5 py-3 text-right">
-                    <form action={convertFreeAccountToPaid}>
-                      <input type="hidden" name="userId" value={c.id} />
-                      <button
-                        type="submit"
-                        className="cursor-pointer rounded-full border border-dorado bg-dorado/10 px-3.5 py-1.5 text-xs font-semibold text-dorado-dark transition-colors hover:bg-dorado/20"
-                      >
-                        Pasar a cuenta paga
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              ))}
+              {freeClients.map((c) => {
+                const badge = accountBadge[c.accountType]
+                return (
+                  <tr key={c.id} className="border-b border-gris/20 last:border-0">
+                    <td className="px-5 py-3 font-medium text-ink">{c.fullName ?? '—'}</td>
+                    <td className="px-5 py-3 text-muted">{c.email}</td>
+                    <td className="px-5 py-3 text-muted">{c.service?.name ?? '—'}</td>
+                    <td className="px-5 py-3">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      {c.accountType === 'free' && (
+                        <form action={convertFreeAccountToPaid}>
+                          <input type="hidden" name="userId" value={c.id} />
+                          <SubmitButton
+                            pendingLabel="Pasando a pago..."
+                            className="cursor-pointer rounded-full border border-dorado bg-dorado/10 px-3.5 py-1.5 text-xs font-semibold text-dorado-dark transition-colors hover:bg-dorado/20"
+                          >
+                            Pasar a cuenta paga
+                          </SubmitButton>
+                        </form>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
