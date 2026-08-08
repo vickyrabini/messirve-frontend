@@ -432,6 +432,11 @@ export function RegisterClientForm({ categories }: Props) {
                     </span>
                   </label>
 
+                  <p className="reveal text-center text-[13px] leading-relaxed text-muted" style={{ transitionDelay: '240ms' }}>
+                    Registrarte es gratis. Cuando tu servicio sea aprobado, vas a poder activarlo con una suscripción mensual de{' '}
+                    <span className="font-bold text-ink">18€</span> para que aparezca en las búsquedas.
+                  </p>
+
                   {/* Error del server action */}
                   {state?.error && (
                     <div className="flex items-start gap-3 rounded-2xl border border-[#E8B4AC] bg-[#FBEAE7] px-5 py-4">
