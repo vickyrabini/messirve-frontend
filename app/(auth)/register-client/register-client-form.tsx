@@ -234,6 +234,12 @@ export function RegisterClientForm({ categories }: Props) {
                   <p className="reveal mt-2 text-[15px] text-muted" style={{ transitionDelay: '60ms' }}>
                     Creá tu cuenta y cargá tu servicio ahora. Lo aprobamos y recién ahí te pedimos el pago.
                   </p>
+                  <span
+                    className="reveal mt-3 inline-flex items-center gap-1.5 rounded-full bg-dorado/15 px-3.5 py-1.5 text-[13.5px] font-bold text-dorado-dark"
+                    style={{ transitionDelay: '80ms' }}
+                  >
+                    Suscripción mensual: 18€
+                  </span>
                 </header>
 
                 <form action={formAction} noValidate className="space-y-6">
