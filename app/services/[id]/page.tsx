@@ -187,14 +187,6 @@ export default async function ServiceDetailPage({
               </p>
             </div>
           )}
-          {service.price_info && (
-            <div>
-              <p className="text-[13px] font-bold uppercase tracking-wide text-muted">
-                Precio
-              </p>
-              <p className="mt-1 text-[15px] text-ink">{service.price_info}</p>
-            </div>
-          )}
           {service.phone && (
             <div>
               <p className="text-[13px] font-bold uppercase tracking-wide text-muted">

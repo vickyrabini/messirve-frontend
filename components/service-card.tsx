@@ -100,11 +100,6 @@ export function ServiceCard({ service }: Props) {
               {service.city}
             </p>
           )}
-          {service.price_info && (
-            <span className="shrink-0 rounded-lg bg-dorado/10 px-2 py-[3px] text-[11px] font-bold text-dorado">
-              {service.price_info}
-            </span>
-          )}
         </div>
 
         {service.description && (

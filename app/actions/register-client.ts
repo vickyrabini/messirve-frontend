@@ -47,7 +47,6 @@ export async function registerClient(_state: RegisterClientState, formData: Form
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const priceInfo = (formData.get('priceInfo') as string)?.trim() || null
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
@@ -123,7 +122,6 @@ export async function registerClient(_state: RegisterClientState, formData: Form
     description,
     address,
     city,
-    price_info: priceInfo,
     phone,
     website,
     instagram,

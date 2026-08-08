@@ -32,6 +32,10 @@ export function SubscribeCard({ checkoutStatus }: Props) {
             {state?.error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>
             )}
+            <p className="text-[15px] text-muted">
+              Tu suscripción mensual cuesta <span className="font-bold text-ink">18€</span>, así tu servicio se mantiene visible todo
+              el mes.
+            </p>
             <button
               type="submit"
               disabled={isPending}

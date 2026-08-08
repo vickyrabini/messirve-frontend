@@ -104,37 +104,29 @@ export function EditServiceForm({ service, categories }: Props) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="priceInfo" className={labelClass}>
-            Precio
-          </label>
-          <input id="priceInfo" name="priceInfo" type="text" className={inputClass} defaultValue={service.price_info ?? ''} />
-        </div>
-        <div>
           <label htmlFor="phone" className={labelClass}>
             Teléfono
           </label>
           <input id="phone" name="phone" type="tel" className={inputClass} defaultValue={service.phone ?? ''} />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="website" className={labelClass}>
             Sitio web
           </label>
           <input id="website" name="website" type="url" className={inputClass} defaultValue={service.website ?? ''} />
         </div>
-        <div>
-          <label htmlFor="instagram" className={labelClass}>
-            Instagram
-          </label>
-          <input id="instagram" name="instagram" type="text" className={inputClass} defaultValue={service.instagram ?? ''} />
-        </div>
+      </div>
+
+      <div>
+        <label htmlFor="instagram" className={labelClass}>
+          Instagram
+        </label>
+        <input id="instagram" name="instagram" type="text" className={inputClass} defaultValue={service.instagram ?? ''} />
       </div>
 
       <div>
         <label htmlFor="photos" className={labelClass}>
-          Fotos
+          Logo
         </label>
         {service.photos.length > 0 && (
           <div className="mb-2 space-y-1.5">
@@ -148,12 +140,15 @@ export function EditServiceForm({ service, categories }: Props) {
             <p className="text-xs text-muted">Si seleccionás fotos nuevas, estas serán reemplazadas y eliminadas</p>
           </div>
         )}
-        <input id="photos" name="photos" type="file" multiple accept="image/*" className={inputClass} onChange={handlePhotosChange} />
+        <input id="photos" name="photos" type="file" accept="image/*" className={inputClass} onChange={handlePhotosChange} />
         {photoError ? (
           <p className="mt-1 text-xs font-semibold text-red-500">{photoError}</p>
         ) : (
           <p className="mt-1 text-xs text-muted">Dejalo vacío para mantener las fotos actuales</p>
         )}
+        <p className="mt-1 text-xs text-muted">
+          Para que se vea completa y sin recortes, subí una foto horizontal (formato 4:3, por ejemplo 1200×900px).
+        </p>
       </div>
 
       {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>}
