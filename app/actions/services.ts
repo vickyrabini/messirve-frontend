@@ -8,6 +8,16 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
+// La extensión sale de un mapeo fijo por MIME type, nunca del nombre de archivo que
+// manda el cliente (falseable) — cierra la vía de subir bytes arbitrarios con una
+// extensión engañosa al bucket público service-photos.
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+}
+
 function toSlug(str: string): string {
   return str
     .normalize('NFD')
@@ -29,10 +39,13 @@ export async function toggleLike(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser()
   if (!user) return
 
-  if (wasLiked) {
-    await supabase.from('service_likes').delete().eq('user_id', user.id).eq('service_id', serviceId)
-  } else {
-    await supabase.from('service_likes').insert({ user_id: user.id, service_id: serviceId })
+  const { error } = wasLiked
+    ? await supabase.from('service_likes').delete().eq('user_id', user.id).eq('service_id', serviceId)
+    : await supabase.from('service_likes').insert({ user_id: user.id, service_id: serviceId })
+
+  if (error) {
+    console.log('[toggleLike] error:', { message: error.message, details: error.details, hint: error.hint, code: error.code })
+    return
   }
 
   revalidatePath('/dashboard')
@@ -98,17 +111,24 @@ export async function createService(_state: ServiceFormState, formData: FormData
   const admin = createAdminClient()
 
   const photos: string[] = []
+  const uploadedPaths: string[] = []
   if (photoFiles.length > 0) {
     const slug = toSlug(name)
 
     for (const file of photoFiles) {
-      const ext = file.name.split('.').pop() ?? 'jpg'
+      const ext = MIME_TO_EXT[file.type]
+      if (!ext) {
+        if (uploadedPaths.length > 0) await admin.storage.from('service-photos').remove(uploadedPaths)
+        return { error: 'Formato de imagen no soportado (usá JPG, PNG, WEBP o GIF)' }
+      }
       const path = `${slug}/${randomUUID()}.${ext}`
 
       const { error: uploadError } = await admin.storage.from('service-photos').upload(path, file, { contentType: file.type })
       if (uploadError) {
+        if (uploadedPaths.length > 0) await admin.storage.from('service-photos').remove(uploadedPaths)
         return { error: 'No se pudo subir una de las imágenes. Intentá de nuevo.' }
       }
+      uploadedPaths.push(path)
 
       const { data: urlData } = admin.storage.from('service-photos').getPublicUrl(path)
       photos.push(urlData.publicUrl)
@@ -131,6 +151,7 @@ export async function createService(_state: ServiceFormState, formData: FormData
   })
 
   if (error) {
+    if (uploadedPaths.length > 0) await admin.storage.from('service-photos').remove(uploadedPaths)
     return { error: 'No se pudo crear el servicio. Intentá de nuevo.' }
   }
 
@@ -174,26 +195,35 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
     if (file.size > MAX_FILE_SIZE) return { error: `La imagen "${file.name}" supera el límite de 5MB` }
   }
 
-  // No new files → keep existing photos; new files → delete old ones from storage, upload and replace
+  // No new files → keep existing photos. New files → subir y confirmar el update de la
+  // DB ANTES de tocar las fotos viejas en storage: si algo falla a mitad de camino, las
+  // fotos viejas siguen ahí y la fila sigue apuntando a ellas — nunca quedan URLs muertas.
   let photos: string[] = (existing.photos as string[]) ?? []
+  let oldPaths: string[] = []
+  const uploadedPaths: string[] = []
   if (photoFiles.length > 0) {
     const admin = createAdminClient()
 
     const storageBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/service-photos/`
-    const oldPaths = (existing.photos as string[])
+    oldPaths = (existing.photos as string[])
       .filter((url) => typeof url === 'string' && url.startsWith(storageBase))
       .map((url) => url.slice(storageBase.length))
-    if (oldPaths.length > 0) {
-      await admin.storage.from('service-photos').remove(oldPaths)
-    }
 
     const slug = toSlug(name)
     photos = []
     for (const file of photoFiles) {
-      const ext = file.name.split('.').pop() ?? 'jpg'
+      const ext = MIME_TO_EXT[file.type]
+      if (!ext) {
+        if (uploadedPaths.length > 0) await admin.storage.from('service-photos').remove(uploadedPaths)
+        return { error: 'Formato de imagen no soportado (usá JPG, PNG, WEBP o GIF)' }
+      }
       const path = `${slug}/${randomUUID()}.${ext}`
       const { error: uploadError } = await admin.storage.from('service-photos').upload(path, file, { contentType: file.type })
-      if (uploadError) return { error: 'No se pudo subir una de las imágenes. Intentá de nuevo.' }
+      if (uploadError) {
+        if (uploadedPaths.length > 0) await admin.storage.from('service-photos').remove(uploadedPaths)
+        return { error: 'No se pudo subir una de las imágenes. Intentá de nuevo.' }
+      }
+      uploadedPaths.push(path)
       const { data: urlData } = admin.storage.from('service-photos').getPublicUrl(path)
       photos.push(urlData.publicUrl)
     }
@@ -204,7 +234,15 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
     .update({ category_id: categoryId, name, description, address, city, phone, website, instagram, photos })
     .eq('id', serviceId)
 
-  if (error) return { error: 'No se pudo actualizar el servicio. Intentá de nuevo.' }
+  if (error) {
+    if (uploadedPaths.length > 0) await createAdminClient().storage.from('service-photos').remove(uploadedPaths)
+    return { error: 'No se pudo actualizar el servicio. Intentá de nuevo.' }
+  }
+
+  // La DB ya apunta a las fotos nuevas — recién ahora es seguro borrar las viejas.
+  if (oldPaths.length > 0) {
+    await createAdminClient().storage.from('service-photos').remove(oldPaths)
+  }
 
   revalidatePath('/dashboard')
   redirect('/dashboard')

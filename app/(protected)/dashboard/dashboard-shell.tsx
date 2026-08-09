@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {logout} from "@/app/actions/auth";
@@ -164,6 +164,40 @@ export function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const initial = (fullName || email).charAt(0).toUpperCase();
 
+  // Estos vienen de query params de un solo uso (redirects de Stripe Checkout) — los
+  // congelamos en estado local para poder "olvidarlos" cuando el usuario navega, sin
+  // depender de un refetch del server que haría desaparecer el banner de inmediato.
+  const [statusParams, setStatusParams] = useState({
+    checkoutStatus,
+    paymentUpdateStatus,
+    cancellationStatus,
+  });
+
+  useEffect(() => {
+    if (
+      statusParams.checkoutStatus ||
+      statusParams.paymentUpdateStatus ||
+      statusParams.cancellationStatus
+    ) {
+      // Reescribe solo la URL visible/el historial, sin disparar una navegación de
+      // Next (eso volvería a correr page.tsx en el server y borraría el banner que
+      // se acaba de mostrar). Así, si el usuario recarga o vuelve con "atrás" más
+      // tarde, no queda un query param viejo esperando para resucitar la alerta.
+      window.history.replaceState(null, "", "/dashboard");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function selectTab(next: Tab) {
+    setTab(next);
+    setStatusParams({
+      checkoutStatus: null,
+      paymentUpdateStatus: null,
+      cancellationStatus: null,
+    });
+    setSidebarOpen(false);
+  }
+
   return (
     <div className="relative flex h-screen overflow-hidden bg-cream">
       {sidebarOpen && (
@@ -214,10 +248,7 @@ export function DashboardShell({
             <button
               key={t.id}
               type="button"
-              onClick={() => {
-                setTab(t.id);
-                setSidebarOpen(false);
-              }}
+              onClick={() => selectTab(t.id)}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
                 tab === t.id
                   ? "bg-white/10 text-white"
@@ -327,9 +358,9 @@ export function DashboardShell({
             <SuscripcionTab
               role={role}
               ownService={ownService}
-              checkoutStatus={checkoutStatus}
-              paymentUpdateStatus={paymentUpdateStatus}
-              cancellationStatus={cancellationStatus}
+              checkoutStatus={statusParams.checkoutStatus}
+              paymentUpdateStatus={statusParams.paymentUpdateStatus}
+              cancellationStatus={statusParams.cancellationStatus}
               subscription={subscription}
             />
           )}
@@ -338,6 +369,8 @@ export function DashboardShell({
               fullName={fullName}
               email={email}
               memberSince={memberSince}
+              role={role}
+              hasActiveSubscription={!!subscription}
             />
           )}
         </div>

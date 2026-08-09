@@ -3,11 +3,11 @@
 import { useActionState, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { registerClient, type RegisterClientState } from '@/app/actions/register-client'
+import { registerFreeClient, type RegisterFreeClientState } from '@/app/actions/free-accounts'
 import { AuthSunDecor } from '@/components/auth-sun-decor'
 import type { Category } from '@/types/database'
 
-const initialState: RegisterClientState = { error: null }
+const initialState: RegisterFreeClientState = { error: null }
 
 const inputClass =
   'w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20'
@@ -17,11 +17,13 @@ const labelClass = 'mb-1.5 block text-[14px] font-semibold text-ink'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 type Props = {
+  token: string
+  email: string
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
 }
 
-export function RegisterClientForm({ categories }: Props) {
-  const [state, formAction, isPending] = useActionState(registerClient, initialState)
+export function FreeRegisterForm({ token, email, categories }: Props) {
+  const [state, formAction, isPending] = useActionState(registerFreeClient, initialState)
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
@@ -33,7 +35,6 @@ export function RegisterClientForm({ categories }: Props) {
   const glow2Ref = useRef<HTMLDivElement>(null)
   const prevErrorRef = useRef<string | null>(null)
 
-  // Reveal stagger — IntersectionObserver + CSS, not RAF-dependent
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const els = document.querySelectorAll('.reveal')
@@ -59,7 +60,6 @@ export function RegisterClientForm({ categories }: Props) {
     }
   }, [])
 
-  // GSAP mouse parallax on brand panel glows
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce || !window.matchMedia('(pointer:fine)').matches) return
@@ -83,7 +83,6 @@ export function RegisterClientForm({ categories }: Props) {
     return () => cleanup?.()
   }, [])
 
-  // Animate success card entrance
   useEffect(() => {
     if (!showSuccess) return
     import('gsap').then(({ gsap }) => {
@@ -95,7 +94,6 @@ export function RegisterClientForm({ categories }: Props) {
     })
   }, [showSuccess])
 
-  // Shake submit button on new error
   useEffect(() => {
     if (!state?.error || state.error === prevErrorRef.current) return
     prevErrorRef.current = state.error
@@ -122,7 +120,6 @@ export function RegisterClientForm({ categories }: Props) {
 
   return (
     <>
-      {/* Success overlay */}
       {showSuccess && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
           <div ref={successCardRef} className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-card">
@@ -133,9 +130,9 @@ export function RegisterClientForm({ categories }: Props) {
             </div>
             <h3 className="font-brand uppercase text-2xl text-ink">¡Bienvenido a Messirve!</h3>
             <p className="mt-2 text-[15px] leading-relaxed text-muted">
-              Te mandamos un mail para confirmar tu cuenta. Tu servicio quedó cargado y{' '}
-              <span className="font-semibold text-ink">pendiente de aprobación</span> — te avisamos apenas nuestro
-              equipo lo revise para que puedas pagar la suscripción y quede visible.
+              Tu cuenta es <span className="font-semibold text-ink">gratuita</span> y tu servicio ya está{' '}
+              <span className="font-semibold text-ink">publicado y visible</span> en el buscador. Antes de pasarla a
+              plan pago te avisamos con anticipación.
             </p>
             <div className="mt-3 text-dorado">★★★</div>
             <Link
@@ -148,41 +145,37 @@ export function RegisterClientForm({ categories }: Props) {
         </div>
       )}
 
-      {/* Full-screen layout — escapes the (auth) layout's max-w-md centering.
-          El contenedor no scrollea: cada columna maneja su propio overflow para que
-          el panel de marca quede fijo mientras el formulario (más largo) scrollea solo. */}
       <div className="fixed inset-0 z-50 bg-cream">
         <div className="h-full lg:grid lg:grid-cols-[1.05fr_1fr]">
-
-          {/* ── PANEL DE MARCA (izq, solo desktop, altura fija, no scrollea) ── */}
           <aside className="relative hidden h-full lg:flex flex-col overflow-hidden bg-celeste p-12 xl:p-16 text-white">
-            {/* Dot texture */}
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.07]"
               style={{ backgroundImage: 'radial-gradient(white 1px, transparent 1px)', backgroundSize: '26px 26px' }}
             />
-            {/* Glow blobs — GSAP parallax targets */}
             <div ref={glow1Ref} className="float-slow pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
             <div ref={glow2Ref} className="float-slow pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-dorado/25 blur-3xl" />
             <AuthSunDecor />
 
-            {/* Centro: copy */}
             <div className="relative z-10 flex flex-1 flex-col justify-center max-w-md">
+              <span
+                className="reveal mb-4 inline-flex w-fit items-center rounded-full bg-dorado/25 px-4 py-1.5 text-[13px] font-bold uppercase tracking-wide text-dorado-light"
+              >
+                Invitación gratuita
+              </span>
               <h2 className="reveal font-brand uppercase leading-[0.98]" style={{ fontSize: 'clamp(2.4rem,3.6vw,3.6rem)' }}>
                 Sumá tu <br />
                 <span style={{ color: '#2C4A73' }}>negocio</span>&nbsp;a Messirve
               </h2>
               <p className="reveal mt-6 text-lg leading-relaxed text-white/90" style={{ transitionDelay: '60ms' }}>
-                Cargá tu cuenta y tu servicio en un solo paso. Lo revisamos, lo aprobamos y recién ahí pagás — así
-                llegás a toda la comunidad argentina y uruguaya en Barcelona.
+                Te invitaron con una cuenta gratuita. Cargá tus datos y tu servicio queda visible al instante, sin
+                pagar nada por ahora.
               </p>
 
-              {/* Pasos del flujo */}
               <ul className="reveal mt-8 space-y-4" style={{ transitionDelay: '100ms' }}>
                 {[
                   ['1', 'Completá tus datos y los de tu servicio'],
-                  ['2', 'Nuestro equipo lo revisa y lo aprueba'],
-                  ['3', 'Pagás la suscripción y ya queda visible'],
+                  ['2', 'Tu servicio queda publicado al instante — gratis'],
+                  ['3', 'Si en el futuro pasa a plan pago, te avisamos antes'],
                 ].map(([n, text]) => (
                   <li key={n} className="flex items-start gap-3">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 text-[13px] font-bold">
@@ -193,7 +186,6 @@ export function RegisterClientForm({ categories }: Props) {
                 ))}
               </ul>
             </div>
-            {/* Estrellas */}
             <div className="reveal relative z-10 flex items-center gap-2" style={{ transitionDelay: '160ms' }}>
               <svg width={26} height={26} viewBox="0 0 24 24" fill="#CFB176">
                 <polygon points="12,2 15,9 22,9.3 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.3 9,9" />
@@ -207,9 +199,7 @@ export function RegisterClientForm({ categories }: Props) {
             </div>
           </aside>
 
-          {/* ── FORMULARIO (der) ── */}
           <section className="grain relative flex h-full flex-col overflow-y-auto">
-            {/* Top bar */}
             <div className="flex items-center justify-between px-6 pt-6 sm:px-10">
               <Link href="/" className="lg:hidden">
                 <Image src="/messirve-logo.png" alt="Messirve Barcelona" width={120} height={44} className="h-10 w-auto" />
@@ -229,21 +219,16 @@ export function RegisterClientForm({ categories }: Props) {
                     className="reveal font-brand uppercase leading-tight text-ink"
                     style={{ fontSize: 'clamp(1.9rem,4vw,2.6rem)' }}
                   >
-                    Sumate como emprendedor
+                    Activá tu cuenta gratuita
                   </h1>
                   <p className="reveal mt-2 text-[15px] text-muted" style={{ transitionDelay: '60ms' }}>
-                    Creá tu cuenta y cargá tu servicio ahora. Lo aprobamos y recién ahí te pedimos el pago.
+                    Completá tus datos y los de tu servicio — queda publicado de inmediato, sin pagar nada.
                   </p>
-                  <span
-                    className="reveal mt-3 inline-flex items-center gap-1.5 rounded-full bg-dorado/15 px-3.5 py-1.5 text-[13.5px] font-bold text-dorado-dark"
-                    style={{ transitionDelay: '80ms' }}
-                  >
-                    Suscripción mensual: 18€
-                  </span>
                 </header>
 
                 <form action={formAction} noValidate className="space-y-6">
-                  {/* Sección: cuenta */}
+                  <input type="hidden" name="token" value={token} />
+
                   <div className="reveal space-y-5" style={{ transitionDelay: '100ms' }}>
                     <p className="text-[13px] font-bold uppercase tracking-wide text-celeste-deep">Tu cuenta</p>
 
@@ -266,15 +251,9 @@ export function RegisterClientForm({ categories }: Props) {
                       <label htmlFor="email" className={labelClass}>
                         Email
                       </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        placeholder="vos@email.com"
-                        className={inputClass}
-                      />
+                      <input id="email" type="email" value={email} disabled className={`${inputClass} cursor-not-allowed opacity-70`} />
+                      <input type="hidden" name="email" value={email} />
+                      <p className="mt-1 text-xs text-muted">Esta invitación es exclusiva para este email.</p>
                     </div>
 
                     <div>
@@ -314,13 +293,10 @@ export function RegisterClientForm({ categories }: Props) {
                     </div>
                   </div>
 
-                  {/* Sección: servicio */}
                   <div className="reveal space-y-5 border-t border-gris/30 pt-6" style={{ transitionDelay: '160ms' }}>
                     <div>
                       <p className="text-[13px] font-bold uppercase tracking-wide text-celeste-deep">Tu servicio</p>
-                      <p className="mt-1 text-[13px] text-muted">
-                        Quedará pendiente de aprobación — no se publica todavía.
-                      </p>
+                      <p className="mt-1 text-[13px] text-muted">Queda publicado de inmediato — sin esperar aprobación.</p>
                     </div>
 
                     <div>
@@ -410,7 +386,6 @@ export function RegisterClientForm({ categories }: Props) {
                     </div>
                   </div>
 
-                  {/* Terms */}
                   <label className="reveal flex cursor-pointer select-none items-start gap-3" style={{ transitionDelay: '220ms' }}>
                     <input
                       type="checkbox"
@@ -439,11 +414,11 @@ export function RegisterClientForm({ categories }: Props) {
                   </label>
 
                   <p className="reveal text-center text-[13px] leading-relaxed text-muted" style={{ transitionDelay: '240ms' }}>
-                    Registrarte es gratis. Cuando tu servicio sea aprobado, vas a poder activarlo con una suscripción mensual de{' '}
-                    <span className="font-bold text-ink">18€</span> para que aparezca en las búsquedas.
+                    Esta es una cuenta <span className="font-bold text-ink">gratuita 🎉</span>. El servicio normalmente cuesta{' '}
+                    <span className="font-bold text-ink">18€/mes</span> — si en algún momento pasa a plan pago, te
+                    avisaremos con anticipación antes de que se desactive.
                   </p>
 
-                  {/* Error del server action */}
                   {state?.error && (
                     <div className="flex items-start gap-3 rounded-2xl border border-[#E8B4AC] bg-[#FBEAE7] px-5 py-4">
                       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#C0492F" strokeWidth={2.2} className="mt-0.5 shrink-0">
@@ -458,7 +433,6 @@ export function RegisterClientForm({ categories }: Props) {
                     </div>
                   )}
 
-                  {/* Submit */}
                   <button
                     ref={submitBtnRef}
                     type="submit"
@@ -472,10 +446,10 @@ export function RegisterClientForm({ categories }: Props) {
                           <circle className="opacity-25" cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={4} />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
-                        Creando cuenta y servicio...
+                        Creando cuenta gratuita...
                       </span>
                     ) : (
-                      'Crear cuenta y publicar servicio'
+                      'Crear cuenta gratuita y publicar servicio'
                     )}
                   </button>
                 </form>

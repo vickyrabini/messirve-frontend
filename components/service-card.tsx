@@ -84,7 +84,7 @@ export function ServiceCard({ service }: Props) {
             className="grid h-[38px] w-[38px] cursor-pointer place-items-center rounded-full bg-white/90 text-lg shadow-sm"
           >
             <span
-              className={service.user_liked ? "text-red-500" : "text-muted"}
+              className={service.user_liked ? "text-dorado" : "text-muted"}
             >
               {service.user_liked ? "♥" : "♡"}
             </span>
@@ -110,7 +110,7 @@ export function ServiceCard({ service }: Props) {
 
         <div className="mt-3 flex items-center justify-between border-t border-gris/30 pt-2.5">
           <span className="flex items-center gap-1 text-xs text-muted">
-            <span className="text-red-500">♥</span>
+            <span className="text-dorado">♥</span>
             {service.total_likes > 0
               ? `${service.total_likes} favorito${service.total_likes !== 1 ? "s" : ""}`
               : "Sé el primero"}
