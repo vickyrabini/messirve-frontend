@@ -36,6 +36,7 @@ export function SubscribeCard({ checkoutStatus }: Props) {
               Tu suscripción mensual cuesta <span className="font-bold text-ink">18€</span>, así tu servicio se mantiene visible todo
               el mes.
             </p>
+            <p className="mt-1 text-[13px] text-muted">Podés darte de baja cuando quieras, sin complicaciones.</p>
             <button
               type="submit"
               disabled={isPending}

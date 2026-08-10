@@ -240,6 +240,9 @@ export function RegisterClientForm({ categories }: Props) {
                   >
                     Suscripción mensual: 18€
                   </span>
+                  <p className="reveal mt-2 text-[12px] text-muted" style={{ transitionDelay: '100ms' }}>
+                    Podés darte de baja cuando quieras, sin complicaciones.
+                  </p>
                 </header>
 
                 <form action={formAction} noValidate className="space-y-6">
@@ -440,7 +443,8 @@ export function RegisterClientForm({ categories }: Props) {
 
                   <p className="reveal text-center text-[13px] leading-relaxed text-muted" style={{ transitionDelay: '240ms' }}>
                     Registrarte es gratis. Cuando tu servicio sea aprobado, vas a poder activarlo con una suscripción mensual de{' '}
-                    <span className="font-bold text-ink">18€</span> para que aparezca en las búsquedas.
+                    <span className="font-bold text-ink">18€</span> para que aparezca en las búsquedas. Podés darte de baja cuando
+                    quieras, sin complicaciones.
                   </p>
 
                   {/* Error del server action */}

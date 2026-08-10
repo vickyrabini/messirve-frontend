@@ -92,9 +92,12 @@ export function SuscripcionTab({
                   : 'Cargá tu servicio para empezar. Lo revisamos y, una vez aprobado, pagás la suscripción y aparece en los buscadores.'}
               </p>
               {role === 'user' && (
-                <span className="mx-auto mt-4 flex w-fit items-center gap-1.5 rounded-full bg-dorado/15 px-3.5 py-1.5 text-[13.5px] font-bold text-dorado-dark">
-                  Suscripción mensual: 18€
-                </span>
+                <>
+                  <span className="mx-auto mt-4 flex w-fit items-center gap-1.5 rounded-full bg-dorado/15 px-3.5 py-1.5 text-[13.5px] font-bold text-dorado-dark">
+                    Suscripción mensual: 18€
+                  </span>
+                  <p className="mt-2 text-[12px] text-muted">Podés darte de baja cuando quieras, sin complicaciones.</p>
+                </>
               )}
               <Link
                 href="/dashboard/services/new"
