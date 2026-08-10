@@ -73,6 +73,15 @@ export default async function AdminServicesPage({
     : { data: [] };
   const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]));
 
+  const emailById = new Map(
+    await Promise.all(
+      userIds.map(async (id) => {
+        const { data } = await admin.auth.admin.getUserById(id);
+        return [id, data.user?.email ?? "—"] as const;
+      }),
+    ),
+  );
+
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
       <h1 className="font-brand uppercase text-2xl text-ink">
@@ -108,7 +117,7 @@ export default async function AdminServicesPage({
                       : "—"}
                   </td>
                   <td className="px-5 py-3 text-muted">
-                    {s.user_id ? "Usuario" : "Admin (panel)"}
+                    {s.user_id ? (emailById.get(s.user_id) ?? "—") : "Admin (panel)"}
                   </td>
                   <td className="px-5 py-3">
                     {s.user_id === null ? (
