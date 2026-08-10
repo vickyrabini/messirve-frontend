@@ -416,7 +416,8 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
                   <p className="reveal text-center text-[13px] leading-relaxed text-muted" style={{ transitionDelay: '240ms' }}>
                     Esta es una cuenta <span className="font-bold text-ink">gratuita 🎉</span>. El servicio normalmente cuesta{' '}
                     <span className="font-bold text-ink">18€/mes</span> — si en algún momento pasa a plan pago, te
-                    avisaremos con anticipación antes de que se desactive.
+                    avisaremos con anticipación antes de que se desactive. Y si en algún momento no lo querés más, podés darte de
+                    baja cuando quieras, sin complicaciones.
                   </p>
 
                   {state?.error && (
