@@ -358,7 +358,7 @@ export default function LandingPage({ isAuthenticated, categories }: Props) {
             </p>
           </div>
           <Link
-            href="/register"
+            href="/register-client"
             className="reveal group shrink-0 inline-flex items-center gap-2 rounded-full bg-dorado px-10 py-5 text-[18px] font-bold uppercase tracking-wide text-celeste-deep shadow-soft transition-all hover:-translate-y-0.5 hover:bg-dorado-light"
           >
             Suscribite
