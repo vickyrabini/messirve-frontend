@@ -87,6 +87,21 @@ export async function revokeInvite(formData: FormData): Promise<void> {
   revalidatePath('/admin/free-accounts')
 }
 
+export async function deleteInvite(formData: FormData): Promise<void> {
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') return
+
+  const inviteId = formData.get('inviteId') as string
+  if (!inviteId) return
+
+  // Las invitaciones usadas no se borran: son el único registro de que la cuenta nació
+  // gratuita y de ahí sale la tabla "Cuentas gratuitas activas" en /admin/free-accounts.
+  const admin = createAdminClient()
+  await admin.from('client_invites').delete().eq('id', inviteId).neq('status', 'used')
+
+  revalidatePath('/admin/free-accounts')
+}
+
 export async function convertFreeAccountToPaid(formData: FormData): Promise<void> {
   const caller = await getCurrentProfile()
   if (!caller || caller.role !== 'admin') return
