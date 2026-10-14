@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revokeInvite, convertFreeAccountToPaid } from '@/app/actions/free-accounts'
+import { buildInviteLink } from '@/lib/invite-link'
 import { SubmitButton } from './submit-button'
+import { CopyLinkButton } from './copy-link-button'
 import type { ClientInvite } from '@/types/database'
 
 const statusBadge: Record<ClientInvite['status'], { label: string; className: string }> = {
@@ -99,15 +101,18 @@ export default async function AdminFreeAccountsPage() {
                     </td>
                     <td className="px-5 py-3 text-right">
                       {invite.status === 'pending' && !isExpired && (
-                        <form action={revokeInvite}>
-                          <input type="hidden" name="inviteId" value={invite.id} />
-                          <SubmitButton
-                            pendingLabel="Revocando..."
-                            className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
-                          >
-                            Revocar
-                          </SubmitButton>
-                        </form>
+                        <div className="flex items-center justify-end gap-2">
+                          <CopyLinkButton link={buildInviteLink(invite.token)} />
+                          <form action={revokeInvite}>
+                            <input type="hidden" name="inviteId" value={invite.id} />
+                            <SubmitButton
+                              pendingLabel="Revocando..."
+                              className="cursor-pointer rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                            >
+                              Revocar
+                            </SubmitButton>
+                          </form>
+                        </div>
                       )}
                     </td>
                   </tr>
