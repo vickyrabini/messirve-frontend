@@ -1,26 +1,20 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState } from 'react'
 import Link from 'next/link'
 import { createFreeAccountInvite, type CreateInviteState } from '@/app/actions/free-accounts'
+import InviteLinkResult from '@/components/invite-link-result'
 
 const initialState: CreateInviteState = { error: null }
 
 const inputClass =
-  'w-full px-4 py-2.5 rounded-lg border border-gris/40 text-sm focus:outline-none focus:ring-2 focus:ring-celeste/30 focus:border-celeste'
+  'w-full px-4 py-2.5 rounded-lg border border-gris/40 text-sm focus:outline-none focus:ring-2 focus:ring-celeste/30 focus:border-celeste disabled:bg-gris/10'
 
 const labelClass = 'block text-sm font-medium text-ink mb-1'
 
 export default function NewFreeAccountInvitePage() {
   const [state, formAction, isPending] = useActionState(createFreeAccountInvite, initialState)
-  const [copied, setCopied] = useState(false)
-
-  async function handleCopy() {
-    if (!state?.link) return
-    await navigator.clipboard.writeText(state.link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const isCreated = Boolean(state?.success && state.link)
 
   return (
     <div className="mx-auto max-w-md px-8 py-10">
@@ -44,6 +38,7 @@ export default function NewFreeAccountInvitePage() {
             type="email"
             autoComplete="email"
             required
+            disabled={isCreated}
             className={inputClass}
             placeholder="amigo@email.com"
           />
@@ -55,29 +50,24 @@ export default function NewFreeAccountInvitePage() {
           </p>
         )}
 
-        {state?.success && state.link && (
-          <div className="space-y-2 rounded-lg bg-celeste/10 px-3 py-3">
-            <p className="text-sm font-semibold text-celeste-deep">Invitación creada. Mandale este link:</p>
-            <div className="flex items-center gap-2">
-              <input readOnly value={state.link} className="w-full truncate rounded-lg border border-gris/40 bg-white px-3 py-2 text-xs" />
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="shrink-0 cursor-pointer rounded-lg border border-celeste px-3 py-2 text-xs font-semibold text-celeste-deep transition-colors hover:bg-celeste/10"
-              >
-                {copied ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-          </div>
-        )}
+        {isCreated && state.link && <InviteLinkResult link={state.link} />}
 
         <button
           type="submit"
-          disabled={isPending}
-          className="w-full cursor-pointer rounded-full bg-celeste px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark disabled:opacity-60"
+          disabled={isPending || isCreated}
+          className="w-full cursor-pointer rounded-full bg-celeste px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? 'Creando...' : 'Crear invitación'}
         </button>
+
+        {isCreated && (
+          <Link
+            href="/admin/free-accounts"
+            className="block w-full rounded-full border border-celeste px-4 py-2.5 text-center text-sm font-semibold text-celeste-deep transition-colors hover:bg-celeste/10"
+          >
+            Volver
+          </Link>
+        )}
       </form>
     </div>
   )

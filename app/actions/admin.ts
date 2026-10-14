@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { deleteUserAccount, type DeleteUserAccountFailure } from '@/lib/delete-user-account'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -150,4 +151,45 @@ export async function approveService(formData: FormData): Promise<void> {
   await admin.from('services').update({ approved: true }).eq('id', serviceId)
 
   revalidatePath('/admin/services')
+}
+
+export type DeleteUserState = { error: string | null; success?: boolean }
+
+const deleteUserErrors: Record<DeleteUserAccountFailure, string> = {
+  subscription: 'No se pudo cancelar la suscripción de Stripe del usuario. Intentá de nuevo.',
+  service: 'No se pudo eliminar el servicio del usuario. Intentá de nuevo.',
+  invites: 'No se pudieron eliminar las invitaciones del usuario. Intentá de nuevo.',
+  account: 'No se pudo eliminar la cuenta. Intentá de nuevo.',
+}
+
+export async function deleteUserAsAdmin(_state: DeleteUserState, formData: FormData): Promise<DeleteUserState> {
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') {
+    return { error: 'No tenés permiso para eliminar usuarios' }
+  }
+
+  const userId = formData.get('userId') as string
+  if (!userId) {
+    return { error: 'Usuario inválido' }
+  }
+  if (userId === caller.id) {
+    return { error: 'No podés eliminar tu propia cuenta desde acá' }
+  }
+
+  const admin = createAdminClient()
+
+  // Los admins no se borran desde la tabla — esta acción es para limpiar user/client de prueba.
+  const { data: target } = await admin.from('profiles').select('role').eq('id', userId).maybeSingle()
+  if (target?.role === 'admin') {
+    return { error: 'No se puede eliminar a otro administrador' }
+  }
+
+  const failure = await deleteUserAccount(admin, userId)
+  if (failure) {
+    return { error: deleteUserErrors[failure] }
+  }
+
+  revalidatePath('/admin/users')
+  revalidatePath('/admin/free-accounts')
+  return { error: null, success: true }
 }

@@ -4,8 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getStripe } from '@/lib/stripe'
-import { deleteOwnedService } from '@/lib/delete-owned-service'
+import { deleteUserAccount, type DeleteUserAccountFailure } from '@/lib/delete-user-account'
 
 export type UpdateProfileState = { error: string | null; success?: boolean }
 
@@ -35,6 +34,13 @@ export async function updateProfile(_state: UpdateProfileState, formData: FormDa
 
 export type DeleteAccountState = { error: string | null }
 
+const deleteAccountErrors: Record<DeleteUserAccountFailure, string> = {
+  subscription: 'No se pudo cancelar tu suscripción. Intentá de nuevo.',
+  service: 'No se pudo eliminar tu servicio. Intentá de nuevo.',
+  invites: 'No se pudo eliminar tu cuenta. Intentá de nuevo.',
+  account: 'No se pudo eliminar tu cuenta. Intentá de nuevo.',
+}
+
 export async function deleteAccount(_state: DeleteAccountState, _formData: FormData): Promise<DeleteAccountState> {
   const supabase = await createClient()
   const {
@@ -45,42 +51,12 @@ export async function deleteAccount(_state: DeleteAccountState, _formData: FormD
     redirect('/login')
   }
 
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-
   // Deleting an auth user requires the service-role key — bypasses RLS, but we only
   // ever act on the caller's own id, taken from their own session above (never from input).
-  const admin = createAdminClient()
-
-  if (profile?.role === 'client') {
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('stripe_subscription_id')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    if (subscription?.stripe_subscription_id) {
-      try {
-        await getStripe().subscriptions.cancel(subscription.stripe_subscription_id)
-      } catch (err) {
-        const stripeError = err as { message?: string; type?: string; code?: string }
-        console.log('[deleteAccount] Stripe cancel error:', {
-          message: stripeError?.message,
-          type: stripeError?.type,
-          code: stripeError?.code,
-        })
-        return { error: 'No se pudo cancelar tu suscripción. Intentá de nuevo.' }
-      }
-    }
+  const failure = await deleteUserAccount(createAdminClient(), user.id)
+  if (failure) {
+    return { error: deleteAccountErrors[failure] }
   }
-
-  try {
-    await deleteOwnedService(admin, user.id)
-  } catch (err) {
-    console.log('[deleteAccount] cleanup error:', { message: (err as Error)?.message })
-    return { error: 'No se pudo eliminar tu servicio. Intentá de nuevo.' }
-  }
-
-  await admin.auth.admin.deleteUser(user.id)
 
   await supabase.auth.signOut()
   redirect('/')

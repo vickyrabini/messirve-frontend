@@ -4,6 +4,7 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buildInviteLink } from '@/lib/invite-link'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -70,7 +71,7 @@ export async function createFreeAccountInvite(_state: CreateInviteState, formDat
   }
 
   revalidatePath('/admin/free-accounts')
-  return { error: null, success: true, link: `${process.env.NEXT_PUBLIC_SITE_URL}/registro-gratis/${token}` }
+  return { error: null, success: true, link: buildInviteLink(token) }
 }
 
 export async function revokeInvite(formData: FormData): Promise<void> {
@@ -82,6 +83,21 @@ export async function revokeInvite(formData: FormData): Promise<void> {
 
   const admin = createAdminClient()
   await admin.from('client_invites').update({ status: 'revoked' }).eq('id', inviteId).eq('status', 'pending')
+
+  revalidatePath('/admin/free-accounts')
+}
+
+export async function deleteInvite(formData: FormData): Promise<void> {
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') return
+
+  const inviteId = formData.get('inviteId') as string
+  if (!inviteId) return
+
+  // Las invitaciones usadas no se borran: son el único registro de que la cuenta nació
+  // gratuita y de ahí sale la tabla "Cuentas gratuitas activas" en /admin/free-accounts.
+  const admin = createAdminClient()
+  await admin.from('client_invites').delete().eq('id', inviteId).neq('status', 'used')
 
   revalidatePath('/admin/free-accounts')
 }
