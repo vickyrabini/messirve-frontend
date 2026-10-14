@@ -170,6 +170,16 @@ export async function POST(request: NextRequest) {
           break
         }
 
+        // Al borrar una cuenta (deleteUserAccount) se cancela la suscripción y después se borra
+        // el usuario — el customer.subscription.deleted llega cuando ya no existe. Sin este
+        // chequeo, el upsert viola la FK de subscriptions.user_id, devolvemos 500 y Stripe
+        // reintenta el evento durante días.
+        const { data: stillExists } = await admin.from('profiles').select('id').eq('id', userId).maybeSingle()
+        if (!stillExists) {
+          console.log('[stripe webhook] user already deleted, skipping subscription event', { userId, type: event.type })
+          break
+        }
+
         const status: SubscriptionStatus =
           event.type === 'customer.subscription.deleted' ? 'canceled' : (subscription.status as SubscriptionStatus)
 
