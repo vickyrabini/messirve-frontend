@@ -1,19 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 
 type InviteLinkResultProps = {
   link: string
 }
 
 export default function InviteLinkResult({ link }: InviteLinkResultProps) {
-  const [copied, setCopied] = useState(false)
-
-  async function handleCopy() {
-    await navigator.clipboard.writeText(link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const { copied, copy } = useCopyToClipboard()
 
   return (
     <div className="space-y-3 rounded-lg border border-celeste/40 bg-celeste/10 px-4 py-4">
@@ -26,7 +20,7 @@ export default function InviteLinkResult({ link }: InviteLinkResultProps) {
         <input readOnly value={link} className="w-full truncate rounded-lg border border-gris/40 bg-white px-3 py-2 text-xs" />
         <button
           type="button"
-          onClick={handleCopy}
+          onClick={() => copy(link)}
           className="shrink-0 cursor-pointer rounded-lg border border-celeste px-3 py-2 text-xs font-semibold text-celeste-deep transition-colors hover:bg-celeste/10"
         >
           {copied ? 'Copiado' : 'Copiar'}
