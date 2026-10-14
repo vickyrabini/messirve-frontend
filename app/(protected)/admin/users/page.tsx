@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Pagination } from '@/components/pagination'
+import { getCurrentProfile } from '@/lib/profile'
+import { DeleteUserButton } from './delete-user-button'
 
 const PAGE_SIZE = 10
 
@@ -22,6 +24,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
   const query = q?.trim().toLowerCase() ?? ''
   const page = Math.max(1, Number(pageParam) || 1)
 
+  const caller = await getCurrentProfile()
   const admin = createAdminClient()
   // listUsers() paginates at 50/page by default — fetch the full set in one go so search
   // and pagination below operate over ALL users, not just the API's first page
@@ -103,12 +106,17 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                     </span>
                   </td>
                   <td className="px-5 py-3 text-right">
-                    <Link
-                      href={`/admin/users/${u.id}`}
-                      className="rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
-                    >
-                      Editar
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/users/${u.id}`}
+                        className="rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                      >
+                        Editar
+                      </Link>
+                      {u.role !== 'admin' && u.id !== caller?.id && (
+                        <DeleteUserButton userId={u.id} name={u.full_name} email={u.email} />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
