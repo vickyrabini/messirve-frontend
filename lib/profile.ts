@@ -11,7 +11,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, role, account_type, created_at')
+    // FULL_NAME_DISABLED: .select('id, full_name, avatar_url, role, account_type, created_at')
+    .select('id, avatar_url, role, account_type, created_at')
     .eq('id', user.id)
     .single()
 

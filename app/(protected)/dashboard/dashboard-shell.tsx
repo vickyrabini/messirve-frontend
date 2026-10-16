@@ -113,7 +113,7 @@ const TAB_TITLES: Record<Tab, string> = {
 };
 
 type Props = {
-  fullName: string;
+  // FULL_NAME_DISABLED: fullName: string;
   email: string;
   memberSince: string;
   isAdmin: boolean;
@@ -141,7 +141,7 @@ type Props = {
 };
 
 export function DashboardShell({
-  fullName,
+  // FULL_NAME_DISABLED: fullName,
   email,
   memberSince,
   isAdmin,
@@ -162,7 +162,8 @@ export function DashboardShell({
       : "explorar",
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const initial = (fullName || email).charAt(0).toUpperCase();
+  // FULL_NAME_DISABLED: const initial = (fullName || email).charAt(0).toUpperCase();
+  const initial = email.charAt(0).toUpperCase();
 
   // Estos vienen de query params de un solo uso (redirects de Stripe Checkout) — los
   // congelamos en estado local para poder "olvidarlos" cuando el usuario navega, sin
@@ -285,10 +286,13 @@ export function DashboardShell({
               {initial}
             </div>
             <div className="min-w-0">
+              {/* FULL_NAME_DISABLED
               <p className="truncate text-[15px] font-semibold text-white">
                 {fullName || "Sin nombre"}
               </p>
               <p className="truncate text-[13px] text-white/50">{email}</p>
+              */}
+              <p className="truncate text-[15px] font-semibold text-white">{email}</p>
             </div>
           </div>
           <form action={logout}>
@@ -347,7 +351,7 @@ export function DashboardShell({
         >
           {tab === "explorar" && (
             <ExplorarTab
-              fullName={fullName}
+              // FULL_NAME_DISABLED: fullName={fullName}
               categories={categories}
               services={exploreServices}
             />
@@ -366,7 +370,7 @@ export function DashboardShell({
           )}
           {tab === "perfil" && (
             <PerfilTab
-              fullName={fullName}
+              // FULL_NAME_DISABLED: fullName={fullName}
               email={email}
               memberSince={memberSince}
               role={role}

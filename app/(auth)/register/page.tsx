@@ -212,7 +212,7 @@ export default function RegisterPage() {
                 </header>
 
                 <form action={formAction} noValidate className="space-y-5">
-                  {/* Nombre completo */}
+                  {/* FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
                   <div className="reveal" style={{ transitionDelay: '120ms' }}>
                     <label htmlFor="fullName" className="mb-1.5 block text-[14px] font-semibold text-ink">
                       Nombre completo
@@ -227,6 +227,7 @@ export default function RegisterPage() {
                       className="w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20"
                     />
                   </div>
+                  */}
 
                   {/* Email */}
                   <div className="reveal" style={{ transitionDelay: '180ms' }}>

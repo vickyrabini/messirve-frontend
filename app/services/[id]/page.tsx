@@ -57,15 +57,16 @@ export default async function ServiceDetailPage({
         .order("created_at", { ascending: false }),
     ]);
 
-  const commenterIds = (comments ?? []).map((c) => c.user_id);
-  const { data: profiles } =
-    commenterIds.length > 0
-      ? await admin
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", commenterIds)
-      : { data: [] };
-  const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const commenterIds = (comments ?? []).map((c) => c.user_id);
+  // const { data: profiles } =
+  //   commenterIds.length > 0
+  //     ? await admin
+  //         .from("profiles")
+  //         .select("id, full_name")
+  //         .in("id", commenterIds)
+  //     : { data: [] };
+  // const nameById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]));
   const ratingByUser = new Map(
     (ratings ?? []).map((r) => [r.user_id, r.stars]),
   );
@@ -120,7 +121,7 @@ export default async function ServiceDetailPage({
 
         <div className="mt-5 flex flex-col gap-6 sm:flex-row">
           <div className="w-full overflow-hidden rounded-3xl sm:w-1/3">
-            <div className="relative w-full aspect-[4/3] max-h-[250px]">
+            <div className="relative w-full aspect-[4/3]">
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -236,11 +237,13 @@ export default async function ServiceDetailPage({
                 >
                   <div className="flex items-center gap-3">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-celeste font-brand text-white">
-                      {(nameById.get(c.user_id) ?? "?").charAt(0).toUpperCase()}
+                      {/* FULL_NAME_DISABLED: {(nameById.get(c.user_id) ?? "?").charAt(0).toUpperCase()} */}
+                      U
                     </div>
                     <div className="flex-1">
                       <p className="text-[15px] font-semibold text-ink">
-                        {nameById.get(c.user_id) ?? "Usuario"}
+                        {/* FULL_NAME_DISABLED: {nameById.get(c.user_id) ?? "Usuario"} */}
+                        Usuario
                       </p>
                       <p className="text-[13px] text-muted">
                         {formatDate(c.created_at)}

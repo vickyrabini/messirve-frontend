@@ -22,7 +22,7 @@ const accountBadge: Record<'free' | 'paid', { label: string; className: string }
 type FreeClientRow = {
   id: string
   email: string
-  fullName: string | null
+  // FULL_NAME_DISABLED: fullName: string | null
   accountType: 'free' | 'paid'
   service: { id: string; name: string; is_active: boolean } | null
 }
@@ -40,7 +40,8 @@ export default async function AdminFreeAccountsPage() {
   const usedByIds = [...new Set((invites ?? []).filter((i) => i.status === 'used' && i.used_by).map((i) => i.used_by as string))]
 
   const { data: freeOriginProfiles } = usedByIds.length
-    ? await admin.from('profiles').select('id, full_name, account_type').in('id', usedByIds)
+    ? // FULL_NAME_DISABLED: await admin.from('profiles').select('id, full_name, account_type').in('id', usedByIds)
+      await admin.from('profiles').select('id, account_type').in('id', usedByIds)
     : { data: [] }
 
   const { data: services } = usedByIds.length
@@ -53,7 +54,7 @@ export default async function AdminFreeAccountsPage() {
   const freeClients: FreeClientRow[] = (freeOriginProfiles ?? []).map((p) => ({
     id: p.id,
     email: emailById.get(p.id) ?? '—',
-    fullName: p.full_name,
+    // FULL_NAME_DISABLED: fullName: p.full_name,
     accountType: p.account_type,
     service: serviceByUserId.get(p.id) ?? null,
   }))
@@ -134,7 +135,7 @@ export default async function AdminFreeAccountsPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
-                <th className="px-5 py-3 font-medium">Nombre</th>
+                {/* FULL_NAME_DISABLED: <th className="px-5 py-3 font-medium">Nombre</th> */}
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Servicio</th>
                 <th className="px-5 py-3 font-medium">Estado</th>
@@ -146,8 +147,8 @@ export default async function AdminFreeAccountsPage() {
                 const badge = accountBadge[c.accountType]
                 return (
                   <tr key={c.id} className="border-b border-gris/20 last:border-0">
-                    <td className="px-5 py-3 font-medium text-ink">{c.fullName ?? '—'}</td>
-                    <td className="px-5 py-3 text-muted">{c.email}</td>
+                    {/* FULL_NAME_DISABLED: <td className="px-5 py-3 font-medium text-ink">{c.fullName ?? '—'}</td> */}
+                    <td className="px-5 py-3 font-medium text-ink">{c.email}</td>
                     <td className="px-5 py-3 text-muted">{c.service?.name ?? '—'}</td>
                     <td className="px-5 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}>{badge.label}</span>

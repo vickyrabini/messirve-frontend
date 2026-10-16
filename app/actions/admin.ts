@@ -18,9 +18,11 @@ export async function createClientUser(_state: CreateUserState, formData: FormDa
 
   const email = (formData.get('email') as string)?.trim()
   const password = formData.get('password') as string
-  const fullName = (formData.get('fullName') as string)?.trim()
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (formData.get('fullName') as string)?.trim()
 
-  if (!email || !password || !fullName) {
+  // FULL_NAME_DISABLED: if (!email || !password || !fullName) {
+  if (!email || !password) {
     return { error: 'Todos los campos son requeridos' }
   }
   if (!emailRegex.test(email)) {
@@ -37,7 +39,7 @@ export async function createClientUser(_state: CreateUserState, formData: FormDa
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName },
+    // FULL_NAME_DISABLED: user_metadata: { full_name: fullName },
   })
 
   if (createError || !created?.user) {
@@ -85,11 +87,13 @@ export async function updateUser(_state: UpdateUserState, formData: FormData): P
   }
 
   const userId = formData.get('userId') as string
-  const fullName = (formData.get('fullName') as string)?.trim()
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (formData.get('fullName') as string)?.trim()
   const role = formData.get('role') as string
   const password = (formData.get('password') as string)?.trim()
 
-  if (!userId || !fullName || !role) {
+  // FULL_NAME_DISABLED: if (!userId || !fullName || !role) {
+  if (!userId || !role) {
     return { error: 'Todos los campos son requeridos' }
   }
   if (!validRoles.includes(role as Role)) {
@@ -107,16 +111,24 @@ export async function updateUser(_state: UpdateUserState, formData: FormData): P
     return { error: 'No se pudo encontrar el usuario' }
   }
 
-  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
-    user_metadata: { ...existing.user.user_metadata, full_name: fullName },
-    ...(password && { password }),
-  })
-  if (authError) {
-    return { error: 'No se pudo actualizar el usuario. Intentá de nuevo.' }
+  // FULL_NAME_DISABLED: sin nombre, solo hay que tocar auth cuando cambia la contraseña.
+  // const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+  //   user_metadata: { ...existing.user.user_metadata, full_name: fullName },
+  //   ...(password && { password }),
+  // })
+  // if (authError) {
+  //   return { error: 'No se pudo actualizar el usuario. Intentá de nuevo.' }
+  // }
+  if (password) {
+    const { error: authError } = await admin.auth.admin.updateUserById(userId, { password })
+    if (authError) {
+      return { error: 'No se pudo actualizar el usuario. Intentá de nuevo.' }
+    }
   }
 
   // 2. Keep `profiles` in sync — it's the source of truth for role checks and getCurrentProfile()
-  const { error: profileError } = await admin.from('profiles').update({ full_name: fullName, role }).eq('id', userId)
+  // FULL_NAME_DISABLED: .update({ full_name: fullName, role })
+  const { error: profileError } = await admin.from('profiles').update({ role }).eq('id', userId)
   if (profileError) {
     return { error: 'Se actualizó la cuenta, pero no se pudo guardar el perfil. Intentá de nuevo.' }
   }

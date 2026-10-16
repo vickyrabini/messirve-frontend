@@ -27,7 +27,7 @@ export function ServiceCard({ service }: Props) {
 
   return (
     <div className="overflow-hidden rounded-[20px] bg-white shadow-card">
-      <div className="relative h-[250px]">
+      <div className="relative aspect-[4/3]">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

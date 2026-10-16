@@ -82,10 +82,10 @@ export async function createService(_state: ServiceFormState, formData: FormData
   }
 
   const categoryId = (formData.get('categoryId') as string)?.trim()
-  const name = (formData.get('name') as string)?.trim()
+  const name = (formData.get('name') as string)?.trim().toUpperCase()
 
   if (!categoryId || !name) {
-    return { error: 'La categoría y el nombre son obligatorios' }
+    return { error: 'La categoría y el nombre de la marca son obligatorios' }
   }
 
   const description = (formData.get('description') as string)?.trim() || null
@@ -178,8 +178,8 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
   if (!existing || existing.user_id !== user.id) return { error: 'No tenés permiso para editar este servicio' }
 
   const categoryId = (formData.get('categoryId') as string)?.trim()
-  const name = (formData.get('name') as string)?.trim()
-  if (!categoryId || !name) return { error: 'La categoría y el nombre son obligatorios' }
+  const name = (formData.get('name') as string)?.trim().toUpperCase()
+  if (!categoryId || !name) return { error: 'La categoría y el nombre de la marca son obligatorios' }
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null

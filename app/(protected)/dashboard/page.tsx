@@ -14,7 +14,8 @@ export default async function DashboardPage({
     data: { user },
   } = await supabase.auth.getUser()
   const profile = await getCurrentProfile()
-  const fullName = (profile?.full_name || (user?.user_metadata?.full_name as string | undefined)) ?? ''
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (profile?.full_name || (user?.user_metadata?.full_name as string | undefined)) ?? ''
 
   const { checkout, paymentUpdate, cancellation } = await searchParams
   const checkoutStatus = checkout === 'success' ? 'success' : checkout === 'cancel' ? 'cancel' : null
@@ -82,7 +83,7 @@ export default async function DashboardPage({
 
   return (
     <DashboardShell
-      fullName={fullName}
+      // FULL_NAME_DISABLED: fullName={fullName}
       email={user?.email ?? ''}
       memberSince={profile?.created_at ?? ''}
       isAdmin={profile?.role === 'admin'}

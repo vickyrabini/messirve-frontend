@@ -1,14 +1,15 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { updateProfile, deleteAccount, type DeleteAccountState } from '@/app/actions/profile'
+// FULL_NAME_DISABLED: import { updateProfile, deleteAccount, type DeleteAccountState } from '@/app/actions/profile'
+import { deleteAccount, type DeleteAccountState } from '@/app/actions/profile'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 
-const initialState = { error: null }
+// FULL_NAME_DISABLED: const initialState = { error: null }
 const initialDeleteState: DeleteAccountState = { error: null }
 
 type Props = {
-  fullName: string
+  // FULL_NAME_DISABLED: fullName: string
   email: string
   memberSince: string
   role: 'admin' | 'client' | 'user'
@@ -21,8 +22,9 @@ function formatMemberSince(iso: string) {
   return `Miembro desde ${label} · Barcelona`
 }
 
-export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscription }: Props) {
-  const [state, formAction, isPending] = useActionState(updateProfile, initialState)
+// FULL_NAME_DISABLED: export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscription }: Props) {
+export function PerfilTab({ email, memberSince, role, hasActiveSubscription }: Props) {
+  // FULL_NAME_DISABLED: const [state, formAction, isPending] = useActionState(updateProfile, initialState)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleteState, deleteFormAction, isDeletePending] = useActionState(deleteAccount, initialDeleteState)
 
@@ -38,14 +40,17 @@ export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscri
       <div className="rounded-[20px] border border-gris/40 bg-white p-8">
         <div className="mb-7 flex items-center gap-4">
           <div className="grid h-[76px] w-[76px] shrink-0 place-items-center rounded-full bg-celeste font-brand text-3xl text-white">
-            {fullName.charAt(0).toUpperCase() || '?'}
+            {/* FULL_NAME_DISABLED: {fullName.charAt(0).toUpperCase() || '?'} */}
+            {email.charAt(0).toUpperCase() || '?'}
           </div>
           <div>
-            <p className="font-brand text-2xl text-ink">{fullName || 'Sin nombre'}</p>
+            {/* FULL_NAME_DISABLED: <p className="font-brand text-2xl text-ink">{fullName || 'Sin nombre'}</p> */}
+            <p className="font-brand text-2xl text-ink">{email}</p>
             <p className="text-[15px] text-muted">{formatMemberSince(memberSince)}</p>
           </div>
         </div>
 
+        {/* FULL_NAME_DISABLED: el perfil solo editaba el nombre, el form queda como bloque de solo lectura
         <form action={formAction} className="flex flex-col gap-4">
           <div>
             <label htmlFor="fullName" className="mb-1.5 block text-[14px] font-semibold text-[#43413B]">
@@ -60,6 +65,8 @@ export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscri
               className="w-full rounded-xl border-[1.5px] border-gris/60 bg-cream px-4 py-3.5 text-[16px] text-ink outline-none transition-colors focus:border-celeste"
             />
           </div>
+        */}
+        <div className="flex flex-col gap-4">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-[14px] font-semibold text-[#43413B]">
               Email
@@ -74,6 +81,7 @@ export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscri
             />
           </div>
 
+          {/* FULL_NAME_DISABLED
           {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-[13px] font-semibold text-red-500">{state.error}</p>}
           {state?.success && <p className="rounded-lg bg-[#E7F1E9] px-3 py-2 text-[13px] font-semibold text-[#2E7D46]">Perfil actualizado</p>}
 
@@ -85,6 +93,8 @@ export function PerfilTab({ fullName, email, memberSince, role, hasActiveSubscri
             {isPending ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </form>
+          */}
+        </div>
       </div>
 
       {isClient && hasActiveSubscription && (

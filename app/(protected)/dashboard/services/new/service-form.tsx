@@ -2,6 +2,9 @@
 
 import { useActionState, useState } from 'react'
 import { createService, type ServiceFormState } from '@/app/actions/services'
+import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
+import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
+import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
 
 const initialState: ServiceFormState = { error: null }
@@ -15,26 +18,9 @@ type Props = {
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024
-
 export function ServiceForm({ categories }: Props) {
   const [state, formAction, isPending] = useActionState(createService, initialState)
   const [photoError, setPhotoError] = useState<string | null>(null)
-
-  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setPhotoError(null)
-    const files = Array.from(e.target.files ?? [])
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        setPhotoError(`"${file.name}" supera el límite de 5MB`)
-        return
-      }
-      if (!file.type.startsWith('image/')) {
-        setPhotoError(`"${file.name}" no es una imagen válida`)
-        return
-      }
-    }
-  }
 
   return (
     <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
@@ -57,9 +43,18 @@ export function ServiceForm({ categories }: Props) {
 
       <div>
         <label htmlFor="name" className={labelClass}>
-          Nombre del servicio
+          Nombre de la marca
         </label>
-        <input id="name" name="name" type="text" required className={inputClass} placeholder="Ej: Peluquería Andina" />
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          autoCapitalize="characters"
+          onInput={uppercaseOnInput}
+          className={inputClass}
+          placeholder="Ej: PELUQUERÍA ANDINA"
+        />
       </div>
 
       <div>
@@ -110,11 +105,9 @@ export function ServiceForm({ categories }: Props) {
         <label htmlFor="photos" className={labelClass}>
           Logo
         </label>
-        <input id="photos" name="photos" type="file" accept="image/*" className={inputClass} onChange={handlePhotosChange} />
+        <PhotoCropInput id="photos" name="photos" className={inputClass} onErrorChange={setPhotoError} />
         {photoError && <p className="mt-1 text-xs font-semibold text-red-500">{photoError}</p>}
-        <p className="mt-1 text-xs text-muted">
-          Para que se vea completa y sin recortes, subí una foto horizontal (formato 4:3, por ejemplo 1200×900px).
-        </p>
+        <p className="mt-1 text-xs text-muted">{PHOTO_HELP_TEXT}</p>
       </div>
 
       {state?.error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-500">{state.error}</p>}

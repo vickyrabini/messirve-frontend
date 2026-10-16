@@ -9,7 +9,8 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const admin = createAdminClient()
   const [{ data: authData }, { data: profile }] = await Promise.all([
     admin.auth.admin.getUserById(id),
-    admin.from('profiles').select('full_name, role').eq('id', id).single(),
+    // FULL_NAME_DISABLED: admin.from('profiles').select('full_name, role').eq('id', id).single(),
+    admin.from('profiles').select('role').eq('id', id).single(),
   ])
 
   if (!authData?.user || !profile) {
@@ -23,12 +24,13 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
       </Link>
 
       <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Editar usuario</h1>
-      <p className="mt-1 text-sm text-muted">Actualizá el nombre, el rol o la contraseña de la cuenta</p>
+      {/* FULL_NAME_DISABLED: <p className="mt-1 text-sm text-muted">Actualizá el nombre, el rol o la contraseña de la cuenta</p> */}
+      <p className="mt-1 text-sm text-muted">Actualizá el rol o la contraseña de la cuenta</p>
 
       <EditUserForm
         userId={id}
         email={authData.user.email ?? '—'}
-        fullName={profile.full_name ?? ''}
+        // FULL_NAME_DISABLED: fullName={profile.full_name ?? ''}
         role={profile.role}
       />
     </div>

@@ -26,12 +26,14 @@ export default function NewClientUserPage() {
       </p>
 
       <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
+          {/* FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
           <div>
             <label htmlFor="fullName" className={labelClass}>
               Nombre completo
             </label>
             <input id="fullName" name="fullName" type="text" required className={inputClass} placeholder="Nombre y apellido" />
           </div>
+          */}
 
           <div>
             <label htmlFor="email" className={labelClass}>

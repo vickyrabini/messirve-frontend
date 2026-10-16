@@ -13,7 +13,7 @@ export default function AdminPage() {
         >
           <p className="text-3xl">🧑‍💼</p>
           <h2 className="mt-3 font-brand uppercase text-lg text-ink">Gestionar usuarios</h2>
-          <p className="mt-1 text-sm text-muted">Buscá usuarios y editá su nombre, rol o contraseña</p>
+          <p className="mt-1 text-sm text-muted">Buscá usuarios y editá su rol o contraseña</p>
         </Link>
 
         <Link

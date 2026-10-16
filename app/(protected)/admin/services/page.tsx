@@ -1,86 +1,70 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toggleServiceActive, approveService } from "@/app/actions/admin";
 import { Pagination } from "@/components/pagination";
-import type { Subscription, SubscriptionStatus } from "@/types/database";
+import { isPaymentKey, paymentBadge, type PaymentKey } from "./payment-status";
+import { ServicesFilters } from "./services-filters";
 
 const PAGE_SIZE = 10;
 
-type ServiceRow = {
+// Fila de public.admin_services_view (supabase/migrations/20261016000000_admin_services_view.sql)
+type AdminServiceRow = {
   id: string;
   name: string;
   is_active: boolean;
   approved: boolean;
   user_id: string | null;
-  categories: { name: string; emoji: string | null } | null;
+  category_name: string | null;
+  category_emoji: string | null;
+  email: string | null;
+  payment_key: PaymentKey | null;
 };
 
-const paymentBadge: Record<
-  SubscriptionStatus,
-  { label: string; className: string }
-> = {
-  active: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
-  trialing: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
-  past_due: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
-  unpaid: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
-  canceled: { label: "Cancelado", className: "bg-gris/20 text-muted" },
-  incomplete: {
-    label: "Pendiente",
-    className: "bg-dorado/15 text-dorado-dark",
-  },
-  incomplete_expired: {
-    label: "Pendiente",
-    className: "bg-dorado/15 text-dorado-dark",
-  },
-  paused: { label: "Pendiente", className: "bg-dorado/15 text-dorado-dark" },
-};
-const NO_PAYMENT = { label: "Sin pago", className: "bg-gris/20 text-muted" };
+// `%`, `_` y `\` son comodines de ILIKE: se escapan para buscar el texto literal.
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
 
 export default async function AdminServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; payment?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, q, payment: paymentParam } = await searchParams;
+  const query = q?.trim() ?? "";
+  const payment = isPaymentKey(paymentParam) ? paymentParam : null;
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
+  // La vista ya trae email y estado de pago, así que filtro y paginación los resuelve la base.
   const admin = createAdminClient();
-  const { data: services, count } = await admin
-    .from("services")
-    .select("id, name, is_active, approved, user_id, categories(name, emoji)", {
-      count: "exact",
-    })
+  let request = admin
+    .from("admin_services_view")
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
-    .range(from, to)
-    .returns<ServiceRow[]>();
+    .range(from, to);
+  if (query) request = request.ilike("email", `%${escapeLike(query)}%`);
+  if (payment) request = request.eq("payment_key", payment);
+  const { data, count } = await request.returns<AdminServiceRow[]>();
+
+  const pageRows = (data ?? []).map((s) => ({
+    ...s,
+    categories: s.category_name
+      ? { name: s.category_name, emoji: s.category_emoji }
+      : null,
+    // Un servicio con dueño cuyo usuario ya no existe en auth muestra "—"
+    email: s.user_id ? (s.email ?? "—") : null,
+    paymentKey: s.payment_key,
+  }));
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
+  const hasFilters = !!query || !!payment;
 
-  const userIds = [
-    ...new Set(
-      (services ?? [])
-        .map((s) => s.user_id)
-        .filter((id): id is string => id !== null),
-    ),
-  ];
-  const { data: subs } = userIds.length
-    ? await admin
-        .from("subscriptions")
-        .select("user_id, status")
-        .in("user_id", userIds)
-        .returns<Pick<Subscription, "user_id" | "status">[]>()
-    : { data: [] };
-  const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]));
-
-  const emailById = new Map(
-    await Promise.all(
-      userIds.map(async (id) => {
-        const { data } = await admin.auth.admin.getUserById(id);
-        return [id, data.user?.email ?? "—"] as const;
-      }),
-    ),
-  );
+  const buildHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (payment) params.set("payment", payment);
+    params.set("page", String(p));
+    return `/admin/services?${params.toString()}`;
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -91,7 +75,9 @@ export default async function AdminServicesPage({
         Activá los servicios pendientes de revisión o desactivá los publicados
       </p>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-gris/30 bg-white">
+      <ServicesFilters initialQuery={q?.trim() ?? ""} initialPayment={payment} />
+
+      <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
@@ -105,7 +91,7 @@ export default async function AdminServicesPage({
               </tr>
             </thead>
             <tbody>
-              {(services ?? []).map((s) => (
+              {pageRows.map((s) => (
                 <tr
                   key={s.id}
                   className="border-b border-gris/20 last:border-0"
@@ -117,25 +103,17 @@ export default async function AdminServicesPage({
                       : "—"}
                   </td>
                   <td className="px-5 py-3 text-muted">
-                    {s.user_id ? (emailById.get(s.user_id) ?? "—") : "Admin (panel)"}
+                    {s.email ?? "Admin (panel)"}
                   </td>
                   <td className="px-5 py-3">
-                    {s.user_id === null ? (
+                    {s.paymentKey === null ? (
                       <span className="text-muted">—</span>
                     ) : (
-                      (() => {
-                        const status = statusByUser.get(s.user_id);
-                        const badge = status
-                          ? paymentBadge[status]
-                          : NO_PAYMENT;
-                        return (
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}
-                          >
-                            {badge.label}
-                          </span>
-                        );
-                      })()
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${paymentBadge[s.paymentKey].className}`}
+                      >
+                        {paymentBadge[s.paymentKey].label}
+                      </span>
                     )}
                   </td>
                   <td className="px-5 py-3">
@@ -184,17 +162,15 @@ export default async function AdminServicesPage({
           </table>
         </div>
 
-        {(services ?? []).length === 0 && (
+        {pageRows.length === 0 && (
           <p className="px-5 py-8 text-center text-sm text-muted">
-            No hay servicios cargados
+            {hasFilters
+              ? "No se encontraron servicios"
+              : "No hay servicios cargados"}
           </p>
         )}
 
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          buildHref={(p) => `/admin/services?page=${p}`}
-        />
+        <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
       </div>
     </div>
   );
