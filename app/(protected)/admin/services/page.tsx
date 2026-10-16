@@ -1,7 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toggleServiceActive, approveService } from "@/app/actions/admin";
 import { Pagination } from "@/components/pagination";
-import type { Subscription, SubscriptionStatus } from "@/types/database";
+import type { Subscription } from "@/types/database";
+import { isPaymentKey, paymentBadge, paymentKeyByStatus } from "./payment-status";
+import { ServicesFilters } from "./services-filters";
 
 const PAGE_SIZE = 10;
 
@@ -13,33 +15,6 @@ type ServiceRow = {
   user_id: string | null;
   categories: { name: string; emoji: string | null } | null;
 };
-
-type PaymentKey = "paid" | "overdue" | "pending" | "canceled" | "none";
-
-const paymentKeyByStatus: Record<SubscriptionStatus, PaymentKey> = {
-  active: "paid",
-  trialing: "paid",
-  past_due: "overdue",
-  unpaid: "overdue",
-  canceled: "canceled",
-  incomplete: "pending",
-  incomplete_expired: "pending",
-  paused: "pending",
-};
-
-const paymentBadge: Record<PaymentKey, { label: string; className: string }> = {
-  paid: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
-  overdue: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
-  pending: { label: "Pendiente", className: "bg-dorado/15 text-dorado-dark" },
-  canceled: { label: "Cancelado", className: "bg-gris/20 text-muted" },
-  none: { label: "Sin pago", className: "bg-gris/20 text-muted" },
-};
-
-const isPaymentKey = (value: string | undefined): value is PaymentKey =>
-  !!value && Object.hasOwn(paymentBadge, value);
-
-const filterClass =
-  "rounded-lg border border-gris/40 px-4 py-2.5 text-sm focus:border-celeste focus:outline-none focus:ring-2 focus:ring-celeste/30";
 
 export default async function AdminServicesPage({
   searchParams,
@@ -116,37 +91,7 @@ export default async function AdminServicesPage({
         Activá los servicios pendientes de revisión o desactivá los publicados
       </p>
 
-      <form
-        action="/admin/services"
-        className="mt-6 flex flex-wrap items-center gap-2"
-      >
-        <input
-          type="search"
-          name="q"
-          defaultValue={q}
-          placeholder="Buscar por email..."
-          className={`${filterClass} w-full max-w-sm`}
-        />
-        <select
-          name="payment"
-          defaultValue={payment ?? ""}
-          aria-label="Filtrar por pago"
-          className={`${filterClass} bg-white`}
-        >
-          <option value="">Todos los pagos</option>
-          {(Object.keys(paymentBadge) as PaymentKey[]).map((key) => (
-            <option key={key} value={key}>
-              {paymentBadge[key].label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="cursor-pointer rounded-full bg-celeste px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-celeste-dark"
-        >
-          Filtrar
-        </button>
-      </form>
+      <ServicesFilters initialQuery={q?.trim() ?? ""} initialPayment={payment} />
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
