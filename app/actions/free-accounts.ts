@@ -146,9 +146,11 @@ export async function registerFreeClient(
 
   const email = (formData.get('email') as string)?.trim().toLowerCase()
   const password = formData.get('password') as string
-  const fullName = (formData.get('fullName') as string)?.trim()
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (formData.get('fullName') as string)?.trim()
 
-  if (!email || !password || !fullName) {
+  // FULL_NAME_DISABLED: if (!email || !password || !fullName) {
+  if (!email || !password) {
     return { error: 'Todos los campos de la cuenta son requeridos' }
   }
   if (email !== invite.email) {
@@ -189,7 +191,7 @@ export async function registerFreeClient(
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName },
+    // FULL_NAME_DISABLED: user_metadata: { full_name: fullName },
   })
 
   if (createError || !created?.user) {

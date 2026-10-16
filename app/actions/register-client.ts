@@ -36,9 +36,11 @@ export type RegisterClientState = { error: string | null; success?: boolean }
 export async function registerClient(_state: RegisterClientState, formData: FormData): Promise<RegisterClientState> {
   const email = (formData.get('email') as string).trim()
   const password = formData.get('password') as string
-  const fullName = (formData.get('fullName') as string).trim()
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (formData.get('fullName') as string).trim()
 
-  if (!email || !password || !fullName) {
+  // FULL_NAME_DISABLED: if (!email || !password || !fullName) {
+  if (!email || !password) {
     return { error: 'Todos los campos de la cuenta son requeridos' }
   }
   if (!isValidEmail(email)) {
@@ -77,7 +79,7 @@ export async function registerClient(_state: RegisterClientState, formData: Form
     email,
     password,
     options: {
-      data: { full_name: fullName },
+      // FULL_NAME_DISABLED: data: { full_name: fullName },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
     },
   })

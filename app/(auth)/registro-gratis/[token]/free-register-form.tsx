@@ -232,6 +232,7 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
                   <div className="reveal space-y-5" style={{ transitionDelay: '100ms' }}>
                     <p className="text-[13px] font-bold uppercase tracking-wide text-celeste-deep">Tu cuenta</p>
 
+                    {/* FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
                     <div>
                       <label htmlFor="fullName" className={labelClass}>
                         Nombre completo
@@ -246,6 +247,7 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
                         className={inputClass}
                       />
                     </div>
+                    */}
 
                     <div>
                       <label htmlFor="email" className={labelClass}>

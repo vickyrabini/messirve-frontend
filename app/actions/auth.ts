@@ -39,9 +39,11 @@ export async function login(_state: AuthState, formData: FormData): Promise<Auth
 export async function register(_state: AuthState, formData: FormData): Promise<AuthState> {
   const email = (formData.get('email') as string).trim()
   const password = formData.get('password') as string
-  const fullName = (formData.get('fullName') as string).trim()
+  // FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
+  // const fullName = (formData.get('fullName') as string).trim()
 
-  if (!email || !password || !fullName) {
+  // FULL_NAME_DISABLED: if (!email || !password || !fullName) {
+  if (!email || !password) {
     return { error: 'Todos los campos son requeridos' }
   }
 
@@ -58,7 +60,7 @@ export async function register(_state: AuthState, formData: FormData): Promise<A
     email,
     password,
     options: {
-      data: { full_name: fullName },
+      // FULL_NAME_DISABLED: data: { full_name: fullName },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
     },
   })
