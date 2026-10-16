@@ -10,7 +10,8 @@ const inputClass =
 
 const labelClass = 'block text-sm font-medium text-ink mb-1'
 
-export function EditUserForm({ userId, email, fullName, role }: { userId: string; email: string; fullName: string; role: string }) {
+// FULL_NAME_DISABLED: export function EditUserForm({ userId, email, fullName, role }: { userId: string; email: string; fullName: string; role: string }) {
+export function EditUserForm({ userId, email, role }: { userId: string; email: string; role: string }) {
   const [state, formAction, isPending] = useActionState(updateUser, initialState)
 
   return (
@@ -22,12 +23,14 @@ export function EditUserForm({ userId, email, fullName, role }: { userId: string
         <p className="rounded-lg border border-gris/20 bg-cream/60 px-4 py-2.5 text-sm text-muted">{email}</p>
       </div>
 
+      {/* FULL_NAME_DISABLED: el cliente pidió quitar el nombre (2026-10-16)
       <div>
         <label htmlFor="fullName" className={labelClass}>
           Nombre completo
         </label>
         <input id="fullName" name="fullName" type="text" required defaultValue={fullName} className={inputClass} />
       </div>
+      */}
 
       <div>
         <label htmlFor="role" className={labelClass}>

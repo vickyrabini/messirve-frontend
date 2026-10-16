@@ -9,7 +9,7 @@ const PAGE_SIZE = 10
 type UserRow = {
   id: string
   email: string
-  full_name: string | null
+  // FULL_NAME_DISABLED: full_name: string | null
   role: string
 }
 
@@ -30,7 +30,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
   // and pagination below operate over ALL users, not just the API's first page
   const [{ data: authData }, { data: profiles }] = await Promise.all([
     admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-    admin.from('profiles').select('id, full_name, role'),
+    // FULL_NAME_DISABLED: admin.from('profiles').select('id, full_name, role'),
+    admin.from('profiles').select('id, role'),
   ])
 
   const profileById = new Map((profiles ?? []).map((p) => [p.id, p]))
@@ -39,13 +40,14 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
     return {
       id: u.id,
       email: u.email ?? '—',
-      full_name: profile?.full_name ?? null,
+      // FULL_NAME_DISABLED: full_name: profile?.full_name ?? null,
       role: profile?.role ?? 'user',
     }
   })
 
   if (query) {
-    users = users.filter((u) => u.full_name?.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))
+    // FULL_NAME_DISABLED: users = users.filter((u) => u.full_name?.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))
+    users = users.filter((u) => u.email.toLowerCase().includes(query))
   }
 
   const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE))
@@ -64,7 +66,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="font-brand uppercase text-2xl text-ink">Usuarios</h1>
-          <p className="mt-1 text-sm text-muted">Buscá, editá el rol, el nombre o la contraseña de cualquier usuario</p>
+          {/* FULL_NAME_DISABLED: <p className="mt-1 text-sm text-muted">Buscá, editá el rol, el nombre o la contraseña de cualquier usuario</p> */}
+          <p className="mt-1 text-sm text-muted">Buscá, editá el rol o la contraseña de cualquier usuario</p>
         </div>
         <Link
           href="/admin/users/new"
@@ -79,7 +82,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
             type="search"
             name="q"
             defaultValue={q}
-            placeholder="Buscar por nombre o email..."
+            // FULL_NAME_DISABLED: placeholder="Buscar por nombre o email..."
+            placeholder="Buscar por email..."
             className="w-full max-w-sm rounded-lg border border-gris/40 px-4 py-2.5 text-sm focus:border-celeste focus:outline-none focus:ring-2 focus:ring-celeste/30"
           />
         </form>
@@ -89,7 +93,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
-                <th className="px-5 py-3 font-medium">Nombre</th>
+                {/* FULL_NAME_DISABLED: <th className="px-5 py-3 font-medium">Nombre</th> */}
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Rol</th>
                 <th className="px-5 py-3 font-medium"></th>
@@ -98,8 +102,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
             <tbody>
               {pageUsers.map((u) => (
                 <tr key={u.id} className="border-b border-gris/20 last:border-0">
-                  <td className="px-5 py-3 font-medium text-ink">{u.full_name ?? '—'}</td>
-                  <td className="px-5 py-3 text-muted">{u.email}</td>
+                  {/* FULL_NAME_DISABLED: <td className="px-5 py-3 font-medium text-ink">{u.full_name ?? '—'}</td> */}
+                  <td className="px-5 py-3 font-medium text-ink">{u.email}</td>
                   <td className="px-5 py-3">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${roleBadgeClass[u.role] ?? roleBadgeClass.user}`}>
                       {u.role}
@@ -114,7 +118,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                         Editar
                       </Link>
                       {u.role !== 'admin' && u.id !== caller?.id && (
-                        <DeleteUserButton userId={u.id} name={u.full_name} email={u.email} />
+                        <DeleteUserButton userId={u.id} /* FULL_NAME_DISABLED: name={u.full_name} */ name={null} email={u.email} />
                       )}
                     </div>
                   </td>
