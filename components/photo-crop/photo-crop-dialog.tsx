@@ -33,6 +33,8 @@ export function PhotoCropDialog({ src, isProcessing, onCancel, onConfirm }: Prop
             crop={crop}
             zoom={zoom}
             aspect={PHOTO_ASPECT}
+            // cover: el área de recorte ocupa todo el visor aunque la foto sea vertical
+            objectFit="cover"
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={(_, pixels) => setArea(pixels)}
