@@ -5,6 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { registerFreeClient, type RegisterFreeClientState } from '@/app/actions/free-accounts'
 import { AuthSunDecor } from '@/components/auth-sun-decor'
+import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
+import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import type { Category } from '@/types/database'
 
 const initialState: RegisterFreeClientState = { error: null }
@@ -13,8 +15,6 @@ const inputClass =
   'w-full rounded-xl border border-gris/60 bg-white/70 px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-celeste focus:bg-white focus:outline-none focus:ring-4 focus:ring-celeste/20'
 
 const labelClass = 'mb-1.5 block text-[14px] font-semibold text-ink'
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 type Props = {
   token: string
@@ -102,21 +102,6 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
       gsap.fromTo(submitBtnRef.current, { x: 0 }, { x: 8, duration: 0.5, ease: 'elastic.out(1,0.3)', yoyo: true, repeat: 5 })
     })
   }, [state?.error])
-
-  function handlePhotosChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setPhotoError(null)
-    const files = Array.from(e.target.files ?? [])
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        setPhotoError(`"${file.name}" supera el límite de 5MB`)
-        return
-      }
-      if (!file.type.startsWith('image/')) {
-        setPhotoError(`"${file.name}" no es una imagen válida`)
-        return
-      }
-    }
-  }
 
   return (
     <>
@@ -373,18 +358,9 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
                       <label htmlFor="photos" className={labelClass}>
                         Logo
                       </label>
-                      <input
-                        id="photos"
-                        name="photos"
-                        type="file"
-                        accept="image/*"
-                        className={inputClass}
-                        onChange={handlePhotosChange}
-                      />
+                      <PhotoCropInput id="photos" name="photos" className={inputClass} onErrorChange={setPhotoError} />
                       {photoError && <p className="mt-1 text-xs font-semibold text-red-500">{photoError}</p>}
-                      <p className="mt-1 text-xs text-muted">
-                        Para que se vea completa y sin recortes, subí una foto horizontal (formato 4:3, por ejemplo 1200×900px).
-                      </p>
+                      <p className="mt-1 text-xs text-muted">{PHOTO_HELP_TEXT}</p>
                     </div>
                   </div>
 
