@@ -90,13 +90,15 @@ export default function TermsAndConditionsPage() {
         </P>
         <SubsectionTitle title="3.2 Registro como Cliente (Usuario)" />
         <P>Para registrarte como cliente debés proporcionar:</P>
-        <Ul items={['Nombre completo', 'Dirección de correo electrónico válida', 'Contraseña segura']} />
+        {/* FULL_NAME_DISABLED: <Ul items={['Nombre completo', 'Dirección de correo electrónico válida', 'Contraseña segura']} /> */}
+        <Ul items={['Dirección de correo electrónico válida', 'Contraseña segura']} />
         <P>El acceso como cliente es completamente gratuito.</P>
         <SubsectionTitle title="3.3 Registro como Prestador de Servicio" />
         <P>Para registrarte como prestador debés proporcionar:</P>
         <Ul
           items={[
-            'Nombre completo y/o nombre comercial o de marca',
+            // FULL_NAME_DISABLED: 'Nombre completo y/o nombre comercial o de marca',
+            'Nombre comercial o de marca',
             'Logotipo o imagen representativa del negocio',
             'Descripción detallada del servicio ofrecido',
             'Datos de contacto: número de WhatsApp y/o cuenta de Instagram',
@@ -310,7 +312,8 @@ export default function TermsAndConditionsPage() {
         <P>Al registrarte y usar la App, podemos recopilar:</P>
         <Ul
           items={[
-            'Nombre completo y/o nombre comercial',
+            // FULL_NAME_DISABLED: 'Nombre completo y/o nombre comercial',
+            'Nombre comercial',
             'Dirección de correo electrónico',
             'Número de teléfono (WhatsApp)',
             'País y ciudad de residencia',
