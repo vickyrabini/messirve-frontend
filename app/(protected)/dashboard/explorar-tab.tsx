@@ -6,13 +6,14 @@ import { getCategoryColor } from "@/lib/category-colors";
 import type { Category, ServiceWithStats } from "@/types/database";
 
 type Props = {
-  fullName: string;
+  // FULL_NAME_DISABLED: fullName: string;
   categories: Category[];
   services: ServiceWithStats[];
 };
 
-export function ExplorarTab({ fullName, categories, services }: Props) {
-  const firstName = fullName.trim().split(" ")[0] || "";
+// FULL_NAME_DISABLED: export function ExplorarTab({ fullName, categories, services }: Props) {
+//   const firstName = fullName.trim().split(" ")[0] || "";
+export function ExplorarTab({ categories, services }: Props) {
   const [query, setQuery] = useState("");
   const [categorySlug, setCategorySlug] = useState<string | null>(null);
 
@@ -35,7 +36,8 @@ export function ExplorarTab({ fullName, categories, services }: Props) {
       <div className="relative mb-8 overflow-hidden rounded-3xl bg-celeste px-8 py-10 sm:px-11 sm:py-12">
         <div className="relative">
           <h2 className="font-brand uppercase text-3xl leading-none text-white sm:text-[38px]">
-            Hola{firstName ? `, ${firstName}` : ""} 👋
+            {/* FULL_NAME_DISABLED: Hola{firstName ? `, ${firstName}` : ""} 👋 */}
+            Hola 👋
           </h2>
           <p className="mt-3 text-[17px] text-white/90 sm:text-[19px]">
             ¿Qué estás buscando hoy? Todo lo nuestro, reseñado por los tuyos.
