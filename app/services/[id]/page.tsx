@@ -121,7 +121,7 @@ export default async function ServiceDetailPage({
 
         <div className="mt-5 flex flex-col gap-6 sm:flex-row">
           <div className="w-full overflow-hidden rounded-3xl sm:w-1/3">
-            <div className="relative w-full aspect-[4/3] max-h-[250px]">
+            <div className="relative w-full aspect-[4/3]">
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
