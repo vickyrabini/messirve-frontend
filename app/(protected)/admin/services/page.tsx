@@ -14,73 +14,98 @@ type ServiceRow = {
   categories: { name: string; emoji: string | null } | null;
 };
 
-const paymentBadge: Record<
-  SubscriptionStatus,
-  { label: string; className: string }
-> = {
-  active: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
-  trialing: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
-  past_due: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
-  unpaid: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
-  canceled: { label: "Cancelado", className: "bg-gris/20 text-muted" },
-  incomplete: {
-    label: "Pendiente",
-    className: "bg-dorado/15 text-dorado-dark",
-  },
-  incomplete_expired: {
-    label: "Pendiente",
-    className: "bg-dorado/15 text-dorado-dark",
-  },
-  paused: { label: "Pendiente", className: "bg-dorado/15 text-dorado-dark" },
+type PaymentKey = "paid" | "overdue" | "pending" | "canceled" | "none";
+
+const paymentKeyByStatus: Record<SubscriptionStatus, PaymentKey> = {
+  active: "paid",
+  trialing: "paid",
+  past_due: "overdue",
+  unpaid: "overdue",
+  canceled: "canceled",
+  incomplete: "pending",
+  incomplete_expired: "pending",
+  paused: "pending",
 };
-const NO_PAYMENT = { label: "Sin pago", className: "bg-gris/20 text-muted" };
+
+const paymentBadge: Record<PaymentKey, { label: string; className: string }> = {
+  paid: { label: "Pagado", className: "bg-[#E7F1E9] text-[#2E7D46]" },
+  overdue: { label: "Pago vencido", className: "bg-red-50 text-red-500" },
+  pending: { label: "Pendiente", className: "bg-dorado/15 text-dorado-dark" },
+  canceled: { label: "Cancelado", className: "bg-gris/20 text-muted" },
+  none: { label: "Sin pago", className: "bg-gris/20 text-muted" },
+};
+
+const isPaymentKey = (value: string | undefined): value is PaymentKey =>
+  !!value && Object.hasOwn(paymentBadge, value);
+
+const filterClass =
+  "rounded-lg border border-gris/40 px-4 py-2.5 text-sm focus:border-celeste focus:outline-none focus:ring-2 focus:ring-celeste/30";
 
 export default async function AdminServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string; payment?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, q, payment: paymentParam } = await searchParams;
+  const query = q?.trim().toLowerCase() ?? "";
+  const payment = isPaymentKey(paymentParam) ? paymentParam : null;
   const page = Math.max(1, Number(pageParam) || 1);
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
 
+  // El email vive en auth.users y el pago en subscriptions, así que no se puede filtrar
+  // con la query de services: traemos todo y filtramos/paginamos en memoria (como en /admin/users).
   const admin = createAdminClient();
-  const { data: services, count } = await admin
-    .from("services")
-    .select("id, name, is_active, approved, user_id, categories(name, emoji)", {
-      count: "exact",
-    })
-    .order("created_at", { ascending: false })
-    .range(from, to)
-    .returns<ServiceRow[]>();
-
-  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
-
-  const userIds = [
-    ...new Set(
-      (services ?? [])
-        .map((s) => s.user_id)
-        .filter((id): id is string => id !== null),
-    ),
-  ];
-  const { data: subs } = userIds.length
-    ? await admin
+  const [{ data: services }, { data: authData }, { data: subs }] =
+    await Promise.all([
+      admin
+        .from("services")
+        .select("id, name, is_active, approved, user_id, categories(name, emoji)")
+        .order("created_at", { ascending: false })
+        .returns<ServiceRow[]>(),
+      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+      admin
         .from("subscriptions")
         .select("user_id, status")
-        .in("user_id", userIds)
-        .returns<Pick<Subscription, "user_id" | "status">[]>()
-    : { data: [] };
-  const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]));
+        .returns<Pick<Subscription, "user_id" | "status">[]>(),
+    ]);
 
   const emailById = new Map(
-    await Promise.all(
-      userIds.map(async (id) => {
-        const { data } = await admin.auth.admin.getUserById(id);
-        return [id, data.user?.email ?? "—"] as const;
-      }),
-    ),
+    (authData?.users ?? []).map((u) => [u.id, u.email ?? "—"]),
   );
+  const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]));
+
+  let rows = (services ?? []).map((s) => {
+    const status = s.user_id ? statusByUser.get(s.user_id) : undefined;
+    return {
+      ...s,
+      email: s.user_id ? (emailById.get(s.user_id) ?? "—") : null,
+      // null = creado desde el panel de admin, no tiene pago asociado
+      paymentKey: s.user_id
+        ? status
+          ? paymentKeyByStatus[status]
+          : ("none" as const)
+        : null,
+    };
+  });
+
+  if (query) {
+    rows = rows.filter((r) => r.email?.toLowerCase().includes(query));
+  }
+  if (payment) {
+    rows = rows.filter((r) => r.paymentKey === payment);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const from = (page - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(from, from + PAGE_SIZE);
+  const hasFilters = !!query || !!payment;
+
+  const buildHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (payment) params.set("payment", payment);
+    params.set("page", String(p));
+    return `/admin/services?${params.toString()}`;
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -91,7 +116,39 @@ export default async function AdminServicesPage({
         Activá los servicios pendientes de revisión o desactivá los publicados
       </p>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-gris/30 bg-white">
+      <form
+        action="/admin/services"
+        className="mt-6 flex flex-wrap items-center gap-2"
+      >
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por email..."
+          className={`${filterClass} w-full max-w-sm`}
+        />
+        <select
+          name="payment"
+          defaultValue={payment ?? ""}
+          aria-label="Filtrar por pago"
+          className={`${filterClass} bg-white`}
+        >
+          <option value="">Todos los pagos</option>
+          {(Object.keys(paymentBadge) as PaymentKey[]).map((key) => (
+            <option key={key} value={key}>
+              {paymentBadge[key].label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="cursor-pointer rounded-full bg-celeste px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-celeste-dark"
+        >
+          Filtrar
+        </button>
+      </form>
+
+      <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
@@ -105,7 +162,7 @@ export default async function AdminServicesPage({
               </tr>
             </thead>
             <tbody>
-              {(services ?? []).map((s) => (
+              {pageRows.map((s) => (
                 <tr
                   key={s.id}
                   className="border-b border-gris/20 last:border-0"
@@ -117,25 +174,17 @@ export default async function AdminServicesPage({
                       : "—"}
                   </td>
                   <td className="px-5 py-3 text-muted">
-                    {s.user_id ? (emailById.get(s.user_id) ?? "—") : "Admin (panel)"}
+                    {s.email ?? "Admin (panel)"}
                   </td>
                   <td className="px-5 py-3">
-                    {s.user_id === null ? (
+                    {s.paymentKey === null ? (
                       <span className="text-muted">—</span>
                     ) : (
-                      (() => {
-                        const status = statusByUser.get(s.user_id);
-                        const badge = status
-                          ? paymentBadge[status]
-                          : NO_PAYMENT;
-                        return (
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badge.className}`}
-                          >
-                            {badge.label}
-                          </span>
-                        );
-                      })()
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${paymentBadge[s.paymentKey].className}`}
+                      >
+                        {paymentBadge[s.paymentKey].label}
+                      </span>
                     )}
                   </td>
                   <td className="px-5 py-3">
@@ -184,17 +233,15 @@ export default async function AdminServicesPage({
           </table>
         </div>
 
-        {(services ?? []).length === 0 && (
+        {pageRows.length === 0 && (
           <p className="px-5 py-8 text-center text-sm text-muted">
-            No hay servicios cargados
+            {hasFilters
+              ? "No se encontraron servicios"
+              : "No hay servicios cargados"}
           </p>
         )}
 
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          buildHref={(p) => `/admin/services?page=${p}`}
-        />
+        <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
       </div>
     </div>
   );
