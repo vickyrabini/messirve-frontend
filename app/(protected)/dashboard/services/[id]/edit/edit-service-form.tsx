@@ -5,6 +5,7 @@ import { useActionState, useState } from 'react'
 import { updateService, type UpdateServiceState } from '@/app/actions/services'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
+import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
 
 const initialState: UpdateServiceState = { error: null }
@@ -60,9 +61,18 @@ export function EditServiceForm({ service, categories }: Props) {
 
       <div>
         <label htmlFor="name" className={labelClass}>
-          Nombre del servicio
+          Nombre de la marca
         </label>
-        <input id="name" name="name" type="text" required className={inputClass} defaultValue={service.name} />
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          autoCapitalize="characters"
+          onInput={uppercaseOnInput}
+          className={inputClass}
+          defaultValue={service.name}
+        />
       </div>
 
       <div>

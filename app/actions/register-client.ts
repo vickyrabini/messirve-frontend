@@ -51,9 +51,9 @@ export async function registerClient(_state: RegisterClientState, formData: Form
   }
 
   const categoryId = (formData.get('categoryId') as string)?.trim()
-  const name = (formData.get('name') as string)?.trim()
+  const name = (formData.get('name') as string)?.trim().toUpperCase()
   if (!categoryId || !name) {
-    return { error: 'La categoría y el nombre del servicio son obligatorios' }
+    return { error: 'La categoría y el nombre de la marca son obligatorios' }
   }
 
   const description = (formData.get('description') as string)?.trim() || null

@@ -7,6 +7,7 @@ import { registerFreeClient, type RegisterFreeClientState } from '@/app/actions/
 import { AuthSunDecor } from '@/components/auth-sun-decor'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
+import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
 
 const initialState: RegisterFreeClientState = { error: null }
@@ -305,9 +306,18 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
 
                     <div>
                       <label htmlFor="name" className={labelClass}>
-                        Nombre del servicio
+                        Nombre de la marca
                       </label>
-                      <input id="name" name="name" type="text" required className={inputClass} placeholder="Ej: Peluquería Andina" />
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        autoCapitalize="characters"
+                        onInput={uppercaseOnInput}
+                        className={inputClass}
+                        placeholder="Ej: PELUQUERÍA ANDINA"
+                      />
                     </div>
 
                     <div>
