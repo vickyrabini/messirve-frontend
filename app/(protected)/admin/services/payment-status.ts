@@ -1,17 +1,6 @@
-import type { SubscriptionStatus } from "@/types/database";
-
+// El mapeo SubscriptionStatus → PaymentKey vive en SQL (columna payment_key de
+// public.admin_services_view) para que la base pueda filtrar por estado.
 export type PaymentKey = "paid" | "overdue" | "pending" | "canceled" | "none";
-
-export const paymentKeyByStatus: Record<SubscriptionStatus, PaymentKey> = {
-  active: "paid",
-  trialing: "paid",
-  past_due: "overdue",
-  unpaid: "overdue",
-  canceled: "canceled",
-  incomplete: "pending",
-  incomplete_expired: "pending",
-  paused: "pending",
-};
 
 export const paymentBadge: Record<
   PaymentKey,

@@ -1,20 +1,26 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toggleServiceActive, approveService } from "@/app/actions/admin";
 import { Pagination } from "@/components/pagination";
-import type { Subscription } from "@/types/database";
-import { isPaymentKey, paymentBadge, paymentKeyByStatus } from "./payment-status";
+import { isPaymentKey, paymentBadge, type PaymentKey } from "./payment-status";
 import { ServicesFilters } from "./services-filters";
 
 const PAGE_SIZE = 10;
 
-type ServiceRow = {
+// Fila de public.admin_services_view (supabase/migrations/20261016000000_admin_services_view.sql)
+type AdminServiceRow = {
   id: string;
   name: string;
   is_active: boolean;
   approved: boolean;
   user_id: string | null;
-  categories: { name: string; emoji: string | null } | null;
+  category_name: string | null;
+  category_emoji: string | null;
+  email: string | null;
+  payment_key: PaymentKey | null;
 };
+
+// `%`, `_` y `\` son comodines de ILIKE: se escapan para buscar el texto literal.
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
 
 export default async function AdminServicesPage({
   searchParams,
@@ -22,56 +28,34 @@ export default async function AdminServicesPage({
   searchParams: Promise<{ page?: string; q?: string; payment?: string }>;
 }) {
   const { page: pageParam, q, payment: paymentParam } = await searchParams;
-  const query = q?.trim().toLowerCase() ?? "";
+  const query = q?.trim() ?? "";
   const payment = isPaymentKey(paymentParam) ? paymentParam : null;
   const page = Math.max(1, Number(pageParam) || 1);
-
-  // El email vive en auth.users y el pago en subscriptions, así que no se puede filtrar
-  // con la query de services: traemos todo y filtramos/paginamos en memoria (como en /admin/users).
-  const admin = createAdminClient();
-  const [{ data: services }, { data: authData }, { data: subs }] =
-    await Promise.all([
-      admin
-        .from("services")
-        .select("id, name, is_active, approved, user_id, categories(name, emoji)")
-        .order("created_at", { ascending: false })
-        .returns<ServiceRow[]>(),
-      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-      admin
-        .from("subscriptions")
-        .select("user_id, status")
-        .returns<Pick<Subscription, "user_id" | "status">[]>(),
-    ]);
-
-  const emailById = new Map(
-    (authData?.users ?? []).map((u) => [u.id, u.email ?? "—"]),
-  );
-  const statusByUser = new Map((subs ?? []).map((s) => [s.user_id, s.status]));
-
-  let rows = (services ?? []).map((s) => {
-    const status = s.user_id ? statusByUser.get(s.user_id) : undefined;
-    return {
-      ...s,
-      email: s.user_id ? (emailById.get(s.user_id) ?? "—") : null,
-      // null = creado desde el panel de admin, no tiene pago asociado
-      paymentKey: s.user_id
-        ? status
-          ? paymentKeyByStatus[status]
-          : ("none" as const)
-        : null,
-    };
-  });
-
-  if (query) {
-    rows = rows.filter((r) => r.email?.toLowerCase().includes(query));
-  }
-  if (payment) {
-    rows = rows.filter((r) => r.paymentKey === payment);
-  }
-
-  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const from = (page - 1) * PAGE_SIZE;
-  const pageRows = rows.slice(from, from + PAGE_SIZE);
+  const to = from + PAGE_SIZE - 1;
+
+  // La vista ya trae email y estado de pago, así que filtro y paginación los resuelve la base.
+  const admin = createAdminClient();
+  let request = admin
+    .from("admin_services_view")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  if (query) request = request.ilike("email", `%${escapeLike(query)}%`);
+  if (payment) request = request.eq("payment_key", payment);
+  const { data, count } = await request.returns<AdminServiceRow[]>();
+
+  const pageRows = (data ?? []).map((s) => ({
+    ...s,
+    categories: s.category_name
+      ? { name: s.category_name, emoji: s.category_emoji }
+      : null,
+    // Un servicio con dueño cuyo usuario ya no existe en auth muestra "—"
+    email: s.user_id ? (s.email ?? "—") : null,
+    paymentKey: s.payment_key,
+  }));
+
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
   const hasFilters = !!query || !!payment;
 
   const buildHref = (p: number) => {
