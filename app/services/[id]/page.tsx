@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { StarRating } from "@/components/star-rating";
 import { PLACEHOLDER_COLORS } from "@/components/service-card";
+import { ServiceAddressLink } from "@/components/service-address-link";
+import { buildMapsUrl } from "@/lib/maps-link";
 import { AuthNavActions } from "@/components/auth-nav-actions";
 import { ReviewForm } from "./review-form";
 import type { Service } from "@/types/database";
@@ -178,14 +180,12 @@ export default async function ServiceDetailPage({
 
         {/* Contacto */}
         <div className="mt-8 grid grid-cols-1 gap-4 rounded-2xl border border-gris/40 bg-white p-6 sm:grid-cols-2">
-          {service.address && (
+          {buildMapsUrl(service) && (
             <div>
               <p className="text-[13px] font-bold uppercase tracking-wide text-muted">
-                Dirección
+                {service.address ? "Dirección" : "Ubicación"}
               </p>
-              <p className="mt-1 text-[15px] text-ink">
-                {service.address}, {service.city}
-              </p>
+              <ServiceAddressLink service={service} />
             </div>
           )}
           {service.phone && (
