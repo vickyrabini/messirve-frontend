@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { StarRating } from "@/components/star-rating";
 import { PLACEHOLDER_COLORS } from "@/components/service-card";
 import { ServiceAddressLink } from "@/components/service-address-link";
+import { ServicePhoneLink } from "@/components/service-phone-link";
 import { buildMapsUrl } from "@/lib/maps-link";
 import { AuthNavActions } from "@/components/auth-nav-actions";
 import { ReviewForm } from "./review-form";
@@ -193,7 +194,7 @@ export default async function ServiceDetailPage({
               <p className="text-[13px] font-bold uppercase tracking-wide text-muted">
                 Teléfono
               </p>
-              <p className="mt-1 text-[15px] text-ink">{service.phone}</p>
+              <ServicePhoneLink phone={service.phone} />
             </div>
           )}
           {service.website && (
