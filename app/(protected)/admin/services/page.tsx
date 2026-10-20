@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toggleServiceActive, approveService } from "@/app/actions/admin";
 import { Pagination } from "@/components/pagination";
@@ -146,6 +147,12 @@ export default async function AdminServicesPage({
                   </td>
                   <td className="px-5 py-3 text-right">
                     <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/admin/services/${s.id}/edit`}
+                        className="rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
+                      >
+                        Editar
+                      </Link>
                       {!s.approved && (
                         <form action={approveService}>
                           <input type="hidden" name="serviceId" value={s.id} />

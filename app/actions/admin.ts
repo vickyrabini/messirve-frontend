@@ -1,9 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isRole } from '@/app/(protected)/admin/users/roles'
+import { saveServiceEdits } from '@/lib/services/save-service-edits'
+import type { UpdateServiceState } from '@/app/actions/services'
 import { deleteUserAccount, type DeleteUserAccountFailure } from '@/lib/delete-user-account'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -161,6 +164,29 @@ export async function approveService(formData: FormData): Promise<void> {
   await admin.from('services').update({ approved: true }).eq('id', serviceId)
 
   revalidatePath('/admin/services')
+}
+
+export async function adminUpdateService(_state: UpdateServiceState, formData: FormData): Promise<UpdateServiceState> {
+  const caller = await getCurrentProfile()
+  if (!caller || caller.role !== 'admin') {
+    return { error: 'No tenés permiso para editar servicios' }
+  }
+
+  const serviceId = formData.get('serviceId') as string
+  if (!serviceId) return { error: 'Servicio no encontrado' }
+
+  // Admin client: el servicio no es del admin y RLS lo bloquearía. Nunca toca is_active/approved.
+  const admin = createAdminClient()
+  const { data: existing } = await admin.from('services').select('photos').eq('id', serviceId).single()
+  if (!existing) return { error: 'Servicio no encontrado' }
+
+  const result = await saveServiceEdits(admin, existing, serviceId, formData)
+  if (result.error) return result
+
+  revalidatePath('/admin/services')
+  revalidatePath(`/services/${serviceId}`)
+  revalidatePath('/dashboard')
+  redirect('/admin/services')
 }
 
 export type DeleteUserState = { error: string | null; success?: boolean }
