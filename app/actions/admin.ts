@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isRole } from '@/app/(protected)/admin/users/roles'
 import { deleteUserAccount, type DeleteUserAccountFailure } from '@/lib/delete-user-account'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -76,9 +77,6 @@ export async function createClientUser(_state: CreateUserState, formData: FormDa
 
 export type UpdateUserState = { error: string | null; success?: boolean }
 
-const validRoles = ['admin', 'client', 'user'] as const
-type Role = (typeof validRoles)[number]
-
 export async function updateUser(_state: UpdateUserState, formData: FormData): Promise<UpdateUserState> {
   // Verify the CALLER is an admin — server-side, never trust the route gate alone
   const caller = await getCurrentProfile()
@@ -96,7 +94,7 @@ export async function updateUser(_state: UpdateUserState, formData: FormData): P
   if (!userId || !role) {
     return { error: 'Todos los campos son requeridos' }
   }
-  if (!validRoles.includes(role as Role)) {
+  if (!isRole(role)) {
     return { error: 'El rol seleccionado no es válido' }
   }
   if (password && password.length < 6) {
