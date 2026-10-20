@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { parseLocation } from '@/lib/parse-location'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -90,6 +91,8 @@ export async function createService(_state: ServiceFormState, formData: FormData
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
+  const location = parseLocation(formData)
+  if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
@@ -140,6 +143,7 @@ export async function createService(_state: ServiceFormState, formData: FormData
     name,
     description,
     address,
+    ...location,
     city,
     phone,
     website,
@@ -183,6 +187,8 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
+  const location = parseLocation(formData)
+  if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
@@ -231,7 +237,7 @@ export async function updateService(_state: UpdateServiceState, formData: FormDa
 
   const { error } = await supabase
     .from('services')
-    .update({ category_id: categoryId, name, description, address, city, phone, website, instagram, photos })
+    .update({ category_id: categoryId, name, description, address, ...location, city, phone, website, instagram, photos })
     .eq('id', serviceId)
 
   if (error) {

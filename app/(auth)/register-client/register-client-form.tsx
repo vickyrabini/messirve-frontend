@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { registerClient, type RegisterClientState } from '@/app/actions/register-client'
 import { AuthSunDecor } from '@/components/auth-sun-decor'
+import { LocationPicker } from '@/components/location-picker/location-picker'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
@@ -368,6 +369,8 @@ export function RegisterClientForm({ categories }: Props) {
                         <input id="city" name="city" type="text" defaultValue="Barcelona" className={inputClass} />
                       </div>
                     </div>
+
+                    <LocationPicker labelClassName={labelClass} />
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>

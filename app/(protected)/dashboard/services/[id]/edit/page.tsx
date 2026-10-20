@@ -15,7 +15,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
   const [{ data: service }, { data: categories }] = await Promise.all([
     supabase
       .from('services')
-      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, user_id')
+      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
       .eq('id', id)
       .single(),
     supabase.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),

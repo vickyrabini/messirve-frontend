@@ -4,6 +4,7 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { parseLocation } from '@/lib/parse-location'
 import { buildInviteLink } from '@/lib/invite-link'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -171,6 +172,8 @@ export async function registerFreeClient(
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
+  const location = parseLocation(formData)
+  if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
@@ -247,6 +250,7 @@ export async function registerFreeClient(
     name,
     description,
     address,
+    ...location,
     city,
     phone,
     website,

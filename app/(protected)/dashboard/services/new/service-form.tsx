@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createService, type ServiceFormState } from '@/app/actions/services'
+import { LocationPicker } from '@/components/location-picker/location-picker'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
@@ -78,6 +79,8 @@ export function ServiceForm({ categories }: Props) {
           <input id="city" name="city" type="text" defaultValue="Barcelona" className={inputClass} />
         </div>
       </div>
+
+      <LocationPicker labelClassName={labelClass} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
