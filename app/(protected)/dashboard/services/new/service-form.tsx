@@ -7,6 +7,7 @@ import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
+import { PhoneHelpText } from '@/components/phone-help-text'
 
 const initialState: ServiceFormState = { error: null }
 
@@ -87,7 +88,8 @@ export function ServiceForm({ categories }: Props) {
           <label htmlFor="phone" className={labelClass}>
             Teléfono
           </label>
-          <input id="phone" name="phone" type="tel" className={inputClass} placeholder="+34 600 000 000" />
+          <input id="phone" name="phone" type="tel" className={inputClass} placeholder="+34600000000" />
+          <PhoneHelpText />
         </div>
         <div>
           <label htmlFor="website" className={labelClass}>
