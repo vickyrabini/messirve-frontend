@@ -1,8 +1,19 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toggleServiceActive, approveService } from "@/app/actions/admin";
 import { Pagination } from "@/components/pagination";
-import { isPaymentKey, paymentBadge, type PaymentKey } from "./payment-status";
-import { ServicesFilters } from "./services-filters";
+import { AdminListFilters } from "@/components/admin-list-filters";
+import { escapeLike } from "@/lib/escape-like";
+import {
+  PAYMENT_KEYS,
+  isPaymentKey,
+  paymentBadge,
+  type PaymentKey,
+} from "./payment-status";
+
+const PAYMENT_OPTIONS = PAYMENT_KEYS.map((key) => ({
+  value: key,
+  label: paymentBadge[key].label,
+}));
 
 const PAGE_SIZE = 10;
 
@@ -18,9 +29,6 @@ type AdminServiceRow = {
   email: string | null;
   payment_key: PaymentKey | null;
 };
-
-// `%`, `_` y `\` son comodines de ILIKE: se escapan para buscar el texto literal.
-const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
 
 export default async function AdminServicesPage({
   searchParams,
@@ -75,7 +83,16 @@ export default async function AdminServicesPage({
         Activá los servicios pendientes de revisión o desactivá los publicados
       </p>
 
-      <ServicesFilters initialQuery={q?.trim() ?? ""} initialPayment={payment} />
+      <AdminListFilters
+        basePath="/admin/services"
+        searchPlaceholder="Buscar por email..."
+        selectParam="payment"
+        selectLabel="Filtrar por pago"
+        selectAllLabel="Todos los pagos"
+        options={PAYMENT_OPTIONS}
+        initialQuery={q?.trim() ?? ""}
+        initialSelect={payment}
+      />
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">

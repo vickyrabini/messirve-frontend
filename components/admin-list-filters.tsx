@@ -1,46 +1,59 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { PAYMENT_KEYS, paymentBadge, type PaymentKey } from "./payment-status";
 
 const filterClass =
   "rounded-lg border border-gris/40 px-4 py-2.5 text-sm focus:border-celeste focus:outline-none focus:ring-2 focus:ring-celeste/30";
 
+export type AdminListFilterOption = { value: string; label: string };
+
 type Props = {
+  basePath: string;
+  searchPlaceholder: string;
+  selectParam: string;
+  selectLabel: string;
+  selectAllLabel: string;
+  options: AdminListFilterOption[];
   initialQuery: string;
-  initialPayment: PaymentKey | null;
+  initialSelect: string | null;
 };
 
-export function ServicesFilters({ initialQuery, initialPayment }: Props) {
+export function AdminListFilters({
+  basePath,
+  searchPlaceholder,
+  selectParam,
+  selectLabel,
+  selectAllLabel,
+  options,
+  initialQuery,
+  initialSelect,
+}: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(initialQuery);
-  const [payment, setPayment] = useState<PaymentKey | "">(
-    initialPayment ?? "",
-  );
+  const [selected, setSelected] = useState(initialSelect ?? "");
   const debouncedQuery = useDebouncedValue(query.trim(), 300);
 
   // Sin `page`: cada cambio de filtro vuelve a la página 1.
-  const applyFilters = (q: string, p: PaymentKey | "") => {
+  const applyFilters = (q: string, s: string) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
-    if (p) params.set("payment", p);
+    if (s) params.set(selectParam, s);
     const qs = params.toString();
-    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname));
+    startTransition(() => router.replace(qs ? `${basePath}?${qs}` : basePath));
   };
 
   useEffect(() => {
-    if (debouncedQuery !== initialQuery) applyFilters(debouncedQuery, payment);
+    if (debouncedQuery !== initialQuery) applyFilters(debouncedQuery, selected);
     // Solo reacciona al texto ya "asentado"; el select aplica por su cuenta.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 
   const clearFilters = () => {
     setQuery("");
-    setPayment("");
+    setSelected("");
     applyFilters("", "");
   };
 
@@ -49,7 +62,7 @@ export function ServicesFilters({ initialQuery, initialPayment }: Props) {
       role="search"
       onSubmit={(e) => {
         e.preventDefault();
-        applyFilters(query.trim(), payment);
+        applyFilters(query.trim(), selected);
       }}
       className={`mt-6 flex flex-wrap items-center gap-2 transition-opacity ${isPending ? "opacity-60" : ""}`}
     >
@@ -57,28 +70,27 @@ export function ServicesFilters({ initialQuery, initialPayment }: Props) {
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar por email..."
-        aria-label="Buscar por email"
+        placeholder={searchPlaceholder}
+        aria-label={searchPlaceholder.replace(/\.+$/, "")}
         className={`${filterClass} w-full max-w-sm`}
       />
       <select
-        value={payment}
+        value={selected}
         onChange={(e) => {
-          const next = e.target.value as PaymentKey | "";
-          setPayment(next);
-          applyFilters(query.trim(), next);
+          setSelected(e.target.value);
+          applyFilters(query.trim(), e.target.value);
         }}
-        aria-label="Filtrar por pago"
+        aria-label={selectLabel}
         className={`${filterClass} bg-white`}
       >
-        <option value="">Todos los pagos</option>
-        {PAYMENT_KEYS.map((key) => (
-          <option key={key} value={key}>
-            {paymentBadge[key].label}
+        <option value="">{selectAllLabel}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>
-      {(query || payment) && (
+      {(query || selected) && (
         <button
           type="button"
           onClick={clearFilters}
