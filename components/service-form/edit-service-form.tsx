@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
-import { updateService, type UpdateServiceState } from '@/app/actions/services'
+import type { UpdateServiceState } from '@/app/actions/services'
+import { LocationPicker } from '@/components/location-picker/location-picker'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
-import type { Category } from '@/types/database'
+import type { Category, Service as ServiceRow } from '@/types/database'
+import { PhoneHelpText } from '@/components/phone-help-text'
 
 const initialState: UpdateServiceState = { error: null }
 
@@ -15,27 +17,32 @@ const inputClass =
 
 const labelClass = 'block text-sm font-medium text-ink mb-1'
 
-type Service = {
-  id: string
-  category_id: string
-  name: string
-  description: string | null
-  address: string | null
-  city: string | null
-  price_info: string | null
-  phone: string | null
-  website: string | null
-  instagram: string | null
-  photos: string[]
-}
+type Service = Pick<
+  ServiceRow,
+  | 'id'
+  | 'category_id'
+  | 'name'
+  | 'description'
+  | 'address'
+  | 'city'
+  | 'price_info'
+  | 'phone'
+  | 'website'
+  | 'instagram'
+  | 'photos'
+  | 'latitude'
+  | 'longitude'
+>
 
 type Props = {
   service: Service
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
+  action: (state: UpdateServiceState, formData: FormData) => Promise<UpdateServiceState>
+  cancelHref: string
 }
 
-export function EditServiceForm({ service, categories }: Props) {
-  const [state, formAction, isPending] = useActionState(updateService, initialState)
+export function EditServiceForm({ service, categories, action, cancelHref }: Props) {
+  const [state, formAction, isPending] = useActionState(action, initialState)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
   return (
@@ -97,12 +104,18 @@ export function EditServiceForm({ service, categories }: Props) {
         </div>
       </div>
 
+      <LocationPicker
+        labelClassName={labelClass}
+        defaultValue={service.latitude != null && service.longitude != null ? { lat: service.latitude, lng: service.longitude } : null}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="phone" className={labelClass}>
             Teléfono
           </label>
           <input id="phone" name="phone" type="tel" className={inputClass} defaultValue={service.phone ?? ''} />
+          <PhoneHelpText />
         </div>
         <div>
           <label htmlFor="website" className={labelClass}>
@@ -155,7 +168,7 @@ export function EditServiceForm({ service, categories }: Props) {
           {isPending ? 'Guardando...' : 'Guardar cambios'}
         </button>
         <Link
-          href="/dashboard"
+          href={cancelHref}
           className="rounded-lg border border-gris/40 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
         >
           Cancelar

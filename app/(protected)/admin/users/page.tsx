@@ -1,62 +1,52 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Pagination } from '@/components/pagination'
+import { AdminListFilters } from '@/components/admin-list-filters'
+import { escapeLike } from '@/lib/escape-like'
 import { getCurrentProfile } from '@/lib/profile'
-import { DeleteUserButton } from './delete-user-button'
+import { ExportMenu } from './export-menu'
+import { ROLES, ROLE_LABEL, isRole } from './roles'
+import { SelectionBar } from './selection-bar'
+import { ADMIN_USER_ROW_COLUMNS, type AdminUserRow } from './users-export-columns'
+import { UsersTable } from './users-table'
 
 const PAGE_SIZE = 10
 
-type UserRow = {
-  id: string
-  email: string
-  // FULL_NAME_DISABLED: full_name: string | null
-  role: string
-}
+const ROLE_OPTIONS = ROLES.map((role) => ({ value: role, label: ROLE_LABEL[role] }))
 
-const roleBadgeClass: Record<string, string> = {
-  admin: 'bg-dorado/10 text-dorado-dark',
-  client: 'bg-celeste/10 text-celeste-deep',
-  user: 'bg-gris/20 text-muted',
-}
-
-export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
-  const { q, page: pageParam } = await searchParams
-  const query = q?.trim().toLowerCase() ?? ''
+export default async function AdminUsersPage({
+  searchParams
+}: {
+  searchParams: Promise<{ q?: string; role?: string; page?: string }>
+}) {
+  const { q, role: roleParam, page: pageParam } = await searchParams
+  const query = q?.trim() ?? ''
+  const role = isRole(roleParam) ? roleParam : null
   const page = Math.max(1, Number(pageParam) || 1)
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
   const caller = await getCurrentProfile()
+  // La vista ya trae rol y email, así que filtro y paginación los resuelve la base.
   const admin = createAdminClient()
-  // listUsers() paginates at 50/page by default — fetch the full set in one go so search
-  // and pagination below operate over ALL users, not just the API's first page
-  const [{ data: authData }, { data: profiles }] = await Promise.all([
-    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-    // FULL_NAME_DISABLED: admin.from('profiles').select('id, full_name, role'),
-    admin.from('profiles').select('id, role'),
-  ])
+  let request = admin
+    .from('admin_users_view')
+    .select(ADMIN_USER_ROW_COLUMNS, { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+  // FULL_NAME_DISABLED: la búsqueda por nombre quedó deshabilitada, solo email
+  if (query) request = request.ilike('email', `%${escapeLike(query)}%`)
+  if (role) request = request.eq('role', role)
+  const { data, count } = await request.returns<AdminUserRow[]>()
 
-  const profileById = new Map((profiles ?? []).map((p) => [p.id, p]))
-  let users: UserRow[] = (authData?.users ?? []).map((u) => {
-    const profile = profileById.get(u.id)
-    return {
-      id: u.id,
-      email: u.email ?? '—',
-      // FULL_NAME_DISABLED: full_name: profile?.full_name ?? null,
-      role: profile?.role ?? 'user',
-    }
-  })
-
-  if (query) {
-    // FULL_NAME_DISABLED: users = users.filter((u) => u.full_name?.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))
-    users = users.filter((u) => u.email.toLowerCase().includes(query))
-  }
-
-  const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE))
-  const from = (page - 1) * PAGE_SIZE
-  const pageUsers = users.slice(from, from + PAGE_SIZE)
+  const users = data ?? []
+  const total = count ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const buildHref = (p: number) => {
     const params = new URLSearchParams()
-    if (q) params.set('q', q)
+    if (query) params.set('q', query)
+    if (role) params.set('role', role)
     params.set('page', String(p))
     return `/admin/users?${params.toString()}`
   }
@@ -69,69 +59,38 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
           {/* FULL_NAME_DISABLED: <p className="mt-1 text-sm text-muted">Buscá, editá el rol, el nombre o la contraseña de cualquier usuario</p> */}
           <p className="mt-1 text-sm text-muted">Buscá, editá el rol o la contraseña de cualquier usuario</p>
         </div>
-        <Link
-          href="/admin/users/new"
-          className="shrink-0 rounded-full bg-celeste px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark"
-        >
-          + Nuevo usuario
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <ExportMenu filteredCount={total} role={role} q={query} />
+          <Link
+            href="/admin/users/new"
+            className="rounded-full bg-celeste px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-celeste-dark"
+          >
+            + Nuevo usuario
+          </Link>
+        </div>
       </div>
 
-        <form action="/admin/users" className="mt-6">
-          <input
-            type="search"
-            name="q"
-            defaultValue={q}
-            // FULL_NAME_DISABLED: placeholder="Buscar por nombre o email..."
-            placeholder="Buscar por email..."
-            className="w-full max-w-sm rounded-lg border border-gris/40 px-4 py-2.5 text-sm focus:border-celeste focus:outline-none focus:ring-2 focus:ring-celeste/30"
-          />
-        </form>
+      <AdminListFilters
+        basePath="/admin/users"
+        // FULL_NAME_DISABLED: searchPlaceholder="Buscar por nombre o email..."
+        searchPlaceholder="Buscar por email..."
+        selectParam="role"
+        selectLabel="Filtrar por rol"
+        selectAllLabel="Todos los roles"
+        options={ROLE_OPTIONS}
+        initialQuery={query}
+        initialSelect={role}
+      />
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
-          <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
-              <tr>
-                {/* FULL_NAME_DISABLED: <th className="px-5 py-3 font-medium">Nombre</th> */}
-                <th className="px-5 py-3 font-medium">Email</th>
-                <th className="px-5 py-3 font-medium">Rol</th>
-                <th className="px-5 py-3 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageUsers.map((u) => (
-                <tr key={u.id} className="border-b border-gris/20 last:border-0">
-                  {/* FULL_NAME_DISABLED: <td className="px-5 py-3 font-medium text-ink">{u.full_name ?? '—'}</td> */}
-                  <td className="px-5 py-3 font-medium text-ink">{u.email}</td>
-                  <td className="px-5 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${roleBadgeClass[u.role] ?? roleBadgeClass.user}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/users/${u.id}`}
-                        className="rounded-full border border-gris/40 px-3.5 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-celeste hover:text-celeste-deep"
-                      >
-                        Editar
-                      </Link>
-                      {u.role !== 'admin' && u.id !== caller?.id && (
-                        <DeleteUserButton userId={u.id} /* FULL_NAME_DISABLED: name={u.full_name} */ name={null} email={u.email} />
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
+      <SelectionBar />
 
-          {users.length === 0 && <p className="px-5 py-8 text-center text-sm text-muted">No se encontraron usuarios</p>}
+      <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
+        <UsersTable users={users} callerId={caller?.id} />
 
-          <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
-        </div>
+        {users.length === 0 && <p className="px-5 py-8 text-center text-sm text-muted">No se encontraron usuarios</p>}
+
+        <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
+      </div>
     </div>
   )
 }

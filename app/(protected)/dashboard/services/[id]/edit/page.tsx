@@ -1,7 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentProfile } from '@/lib/profile'
-import { EditServiceForm } from './edit-service-form'
+import { updateService } from '@/app/actions/services'
+import { EditServiceForm } from '@/components/service-form/edit-service-form'
 
 export default async function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,7 +16,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
   const [{ data: service }, { data: categories }] = await Promise.all([
     supabase
       .from('services')
-      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, user_id')
+      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
       .eq('id', id)
       .single(),
     supabase.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),
@@ -33,7 +34,12 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
           Los cambios quedarán pendientes de revisión por el equipo de Messirve antes de ser visibles.
         </p>
 
-        <EditServiceForm service={{ ...service, photos: (service.photos as string[]) ?? [] }} categories={categories ?? []} />
+        <EditServiceForm
+          service={{ ...service, photos: (service.photos as string[]) ?? [] }}
+          categories={categories ?? []}
+          action={updateService}
+          cancelHref="/dashboard"
+        />
       </main>
     </div>
   )

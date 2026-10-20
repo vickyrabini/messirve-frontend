@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { parseLocation } from '@/lib/parse-location'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -58,6 +59,8 @@ export async function registerClient(_state: RegisterClientState, formData: Form
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
+  const location = parseLocation(formData)
+  if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
   const phone = (formData.get('phone') as string)?.trim() || null
   const website = (formData.get('website') as string)?.trim() || null
@@ -137,6 +140,7 @@ export async function registerClient(_state: RegisterClientState, formData: Form
     name,
     description,
     address,
+    ...location,
     city,
     phone,
     website,

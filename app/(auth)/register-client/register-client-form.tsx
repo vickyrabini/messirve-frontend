@@ -5,10 +5,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { registerClient, type RegisterClientState } from '@/app/actions/register-client'
 import { AuthSunDecor } from '@/components/auth-sun-decor'
+import { LocationPicker } from '@/components/location-picker/location-picker'
 import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
+import { PhoneHelpText } from '@/components/phone-help-text'
 
 const initialState: RegisterClientState = { error: null }
 
@@ -369,12 +371,15 @@ export function RegisterClientForm({ categories }: Props) {
                       </div>
                     </div>
 
+                    <LocationPicker labelClassName={labelClass} />
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <label htmlFor="phone" className={labelClass}>
                           Teléfono
                         </label>
-                        <input id="phone" name="phone" type="tel" className={inputClass} placeholder="+34 600 000 000" />
+                        <input id="phone" name="phone" type="tel" className={inputClass} placeholder="+34600000000" />
+                        <PhoneHelpText />
                       </div>
                       <div>
                         <label htmlFor="website" className={labelClass}>
