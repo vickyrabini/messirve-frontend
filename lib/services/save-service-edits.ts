@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
+import { normalizePhone } from '@/lib/normalize-phone'
 import { MAX_FILE_SIZE, MIME_TO_EXT, toSlug } from '@/lib/services/service-photos'
 
 // Núcleo compartido de edición de un servicio (dueño y admin). NO es un 'use server':
@@ -23,7 +24,9 @@ export async function saveServiceEdits(
   const location = parseLocation(formData)
   if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const phone = (formData.get('phone') as string)?.trim() || null
+  const phoneResult = normalizePhone(formData.get('phone'))
+  if ('error' in phoneResult) return { error: phoneResult.error }
+  const { phone } = phoneResult
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
 

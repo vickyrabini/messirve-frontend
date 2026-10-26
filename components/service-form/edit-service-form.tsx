@@ -8,7 +8,7 @@ import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category, Service as ServiceRow } from '@/types/database'
-import { PhoneHelpText } from '@/components/phone-help-text'
+import { PhoneInputField } from '@/components/phone-input-field'
 
 const initialState: UpdateServiceState = { error: null }
 
@@ -114,8 +114,7 @@ export function EditServiceForm({ service, categories, action, cancelHref }: Pro
           <label htmlFor="phone" className={labelClass}>
             Teléfono
           </label>
-          <input id="phone" name="phone" type="tel" className={inputClass} defaultValue={service.phone ?? ''} />
-          <PhoneHelpText />
+          <PhoneInputField id="phone" inputClassName={inputClass} defaultValue={service.phone} />
         </div>
         <div>
           <label htmlFor="website" className={labelClass}>
