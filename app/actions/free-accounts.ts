@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentProfile } from '@/lib/profile'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
+import { normalizePhone } from '@/lib/normalize-phone'
 import { buildInviteLink } from '@/lib/invite-link'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -175,7 +176,9 @@ export async function registerFreeClient(
   const location = parseLocation(formData)
   if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const phone = (formData.get('phone') as string)?.trim() || null
+  const phoneResult = normalizePhone(formData.get('phone'))
+  if ('error' in phoneResult) return { error: phoneResult.error }
+  const { phone } = phoneResult
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
 

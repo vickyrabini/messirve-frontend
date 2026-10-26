@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
+import { normalizePhone } from '@/lib/normalize-phone'
 import { MAX_FILE_SIZE, MIME_TO_EXT, toSlug } from '@/lib/services/service-photos'
 import { saveServiceEdits } from '@/lib/services/save-service-edits'
 
@@ -75,7 +76,9 @@ export async function createService(_state: ServiceFormState, formData: FormData
   const location = parseLocation(formData)
   if (!location) return { error: 'La ubicación elegida en el mapa no es válida' }
   const city = (formData.get('city') as string)?.trim() || 'Barcelona'
-  const phone = (formData.get('phone') as string)?.trim() || null
+  const phoneResult = normalizePhone(formData.get('phone'))
+  if ('error' in phoneResult) return { error: phoneResult.error }
+  const { phone } = phoneResult
   const website = (formData.get('website') as string)?.trim() || null
   const instagram = (formData.get('instagram') as string)?.trim() || null
 
