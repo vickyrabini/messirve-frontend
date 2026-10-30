@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import { AdminPageContainer } from './admin-page-container'
 
 export default function AdminPage() {
   return (
-    <div className="mx-auto max-w-4xl px-8 py-10">
+    <AdminPageContainer>
       <h1 className="font-brand uppercase text-2xl text-ink">Panel de administración</h1>
       <p className="mt-1 text-sm text-muted">Gestioná usuarios y servicios de la plataforma</p>
 
@@ -33,7 +34,16 @@ export default function AdminPage() {
           <h2 className="mt-3 font-brand uppercase text-lg text-ink">Cuentas gratuitas</h2>
           <p className="mt-1 text-sm text-muted">Generá invitaciones y pasá cuentas gratuitas a plan pago</p>
         </Link>
+
+        <Link
+          href="/admin/rubros"
+          className="rounded-2xl border border-gris/30 bg-white p-6 shadow-card transition-all hover:-translate-y-1 hover:border-celeste/50"
+        >
+          <p className="text-3xl">🏷️</p>
+          <h2 className="mt-3 font-brand uppercase text-lg text-ink">Rubros de categoría</h2>
+          <p className="mt-1 text-sm text-muted">Creá rubros dentro de cada categoría para mejorar las búsquedas</p>
+        </Link>
       </div>
-    </div>
+    </AdminPageContainer>
   )
 }

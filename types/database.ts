@@ -3,12 +3,23 @@ export type Category = {
   name: string
   slug: string
   emoji: string | null
+  order: number
+  created_at: string
+}
+
+export type Subcategory = {
+  id: string
+  category_id: string
+  name: string
+  slug: string
+  order: number
   created_at: string
 }
 
 export type Service = {
   id: string
   category_id: string
+  subcategory_id: string | null
   user_id: string | null
   name: string
   description: string | null
@@ -27,6 +38,7 @@ export type Service = {
   created_at: string
   updated_at: string
   categories?: Category
+  subcategories?: Pick<Subcategory, 'name' | 'slug'> | null
 }
 
 export type ServiceWithStats = Service & {
