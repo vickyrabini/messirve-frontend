@@ -9,6 +9,7 @@ import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category, Service as ServiceRow } from '@/types/database'
 import { PhoneInputField } from '@/components/phone-input-field'
+import { CategorySubcategoryFields, type SubcategoryOption } from './category-subcategory-fields'
 
 const initialState: UpdateServiceState = { error: null }
 
@@ -21,6 +22,7 @@ type Service = Pick<
   ServiceRow,
   | 'id'
   | 'category_id'
+  | 'subcategory_id'
   | 'name'
   | 'description'
   | 'address'
@@ -37,11 +39,12 @@ type Service = Pick<
 type Props = {
   service: Service
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
+  subcategories: SubcategoryOption[]
   action: (state: UpdateServiceState, formData: FormData) => Promise<UpdateServiceState>
   cancelHref: string
 }
 
-export function EditServiceForm({ service, categories, action, cancelHref }: Props) {
+export function EditServiceForm({ service, categories, subcategories, action, cancelHref }: Props) {
   const [state, formAction, isPending] = useActionState(action, initialState)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
@@ -49,22 +52,14 @@ export function EditServiceForm({ service, categories, action, cancelHref }: Pro
     <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
       <input type="hidden" name="serviceId" value={service.id} />
 
-      <div>
-        <label htmlFor="categoryId" className={labelClass}>
-          Categoría
-        </label>
-        <select id="categoryId" name="categoryId" required className={inputClass} defaultValue={service.category_id}>
-          <option value="" disabled>
-            Elegí una categoría
-          </option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.emoji ? `${c.emoji} ` : ''}
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySubcategoryFields
+        categories={categories}
+        subcategories={subcategories}
+        defaultCategoryId={service.category_id}
+        defaultSubcategoryId={service.subcategory_id}
+        inputClass={inputClass}
+        labelClass={labelClass}
+      />
 
       <div>
         <label htmlFor="name" className={labelClass}>

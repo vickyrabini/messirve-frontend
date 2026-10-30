@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
 import { normalizePhone } from '@/lib/normalize-phone'
 import { MAX_FILE_SIZE, MIME_TO_EXT, toSlug } from '@/lib/services/service-photos'
+import { parseSubcategory } from '@/lib/services/parse-subcategory'
 
 // Núcleo compartido de edición de un servicio (dueño y admin). NO es un 'use server':
 // no expone acciones públicas. Quien lo llama es responsable de autenticar/autorizar y
@@ -18,6 +19,10 @@ export async function saveServiceEdits(
   const categoryId = (formData.get('categoryId') as string)?.trim()
   const name = (formData.get('name') as string)?.trim().toUpperCase()
   if (!categoryId || !name) return { error: 'La categoría y el nombre de la marca son obligatorios' }
+
+  const subcategoryResult = await parseSubcategory(formData, categoryId, db)
+  if ('error' in subcategoryResult) return { error: subcategoryResult.error }
+  const { subcategory_id } = subcategoryResult
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
@@ -73,7 +78,7 @@ export async function saveServiceEdits(
 
   const { error } = await db
     .from('services')
-    .update({ category_id: categoryId, name, description, address, ...location, city, phone, website, instagram, photos })
+    .update({ category_id: categoryId, subcategory_id, name, description, address, ...location, city, phone, website, instagram, photos })
     .eq('id', serviceId)
 
   if (error) {

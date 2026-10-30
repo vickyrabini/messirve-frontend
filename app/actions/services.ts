@@ -9,6 +9,7 @@ import { parseLocation } from '@/lib/parse-location'
 import { normalizePhone } from '@/lib/normalize-phone'
 import { MAX_FILE_SIZE, MIME_TO_EXT, toSlug } from '@/lib/services/service-photos'
 import { saveServiceEdits } from '@/lib/services/save-service-edits'
+import { parseSubcategory } from '@/lib/services/parse-subcategory'
 
 export async function toggleLike(formData: FormData): Promise<void> {
   const serviceId = formData.get('serviceId') as string
@@ -71,6 +72,10 @@ export async function createService(_state: ServiceFormState, formData: FormData
     return { error: 'La categoría y el nombre de la marca son obligatorios' }
   }
 
+  const subcategoryResult = await parseSubcategory(formData, categoryId, supabase)
+  if ('error' in subcategoryResult) return { error: subcategoryResult.error }
+  const { subcategory_id } = subcategoryResult
+
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
   const location = parseLocation(formData)
@@ -124,6 +129,7 @@ export async function createService(_state: ServiceFormState, formData: FormData
 
   const { error } = await admin.from('services').insert({
     category_id: categoryId,
+    subcategory_id,
     name,
     description,
     address,

@@ -8,6 +8,10 @@ import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
 import { PhoneInputField } from '@/components/phone-input-field'
+import {
+  CategorySubcategoryFields,
+  type SubcategoryOption,
+} from '@/components/service-form/category-subcategory-fields'
 
 const initialState: ServiceFormState = { error: null }
 
@@ -18,30 +22,21 @@ const labelClass = 'block text-sm font-medium text-ink mb-1'
 
 type Props = {
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
+  subcategories: SubcategoryOption[]
 }
 
-export function ServiceForm({ categories }: Props) {
+export function ServiceForm({ categories, subcategories }: Props) {
   const [state, formAction, isPending] = useActionState(createService, initialState)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
   return (
     <form action={formAction} className="mt-8 space-y-4 rounded-2xl border border-gris/30 bg-white p-6">
-      <div>
-        <label htmlFor="categoryId" className={labelClass}>
-          Categoría
-        </label>
-        <select id="categoryId" name="categoryId" required className={inputClass} defaultValue="">
-          <option value="" disabled>
-            Elegí una categoría
-          </option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.emoji ? `${c.emoji} ` : ''}
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySubcategoryFields
+        categories={categories}
+        subcategories={subcategories}
+        inputClass={inputClass}
+        labelClass={labelClass}
+      />
 
       <div>
         <label htmlFor="name" className={labelClass}>

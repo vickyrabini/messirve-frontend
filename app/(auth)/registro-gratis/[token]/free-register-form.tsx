@@ -10,6 +10,10 @@ import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
+import {
+  CategorySubcategoryFields,
+  type SubcategoryOption,
+} from '@/components/service-form/category-subcategory-fields'
 import { PhoneInputField } from '@/components/phone-input-field'
 
 const initialState: RegisterFreeClientState = { error: null }
@@ -23,9 +27,10 @@ type Props = {
   token: string
   email: string
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
+  subcategories: SubcategoryOption[]
 }
 
-export function FreeRegisterForm({ token, email, categories }: Props) {
+export function FreeRegisterForm({ token, email, categories, subcategories }: Props) {
   const [state, formAction, isPending] = useActionState(registerFreeClient, initialState)
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -289,22 +294,12 @@ export function FreeRegisterForm({ token, email, categories }: Props) {
                       <p className="mt-1 text-[13px] text-muted">Queda publicado de inmediato — sin esperar aprobación.</p>
                     </div>
 
-                    <div>
-                      <label htmlFor="categoryId" className={labelClass}>
-                        Categoría
-                      </label>
-                      <select id="categoryId" name="categoryId" required className={inputClass} defaultValue="">
-                        <option value="" disabled>
-                          Elegí una categoría
-                        </option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.emoji ? `${c.emoji} ` : ''}
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <CategorySubcategoryFields
+                      categories={categories}
+                      subcategories={subcategories}
+                      inputClass={inputClass}
+                      labelClass={labelClass}
+                    />
 
                     <div>
                       <label htmlFor="name" className={labelClass}>

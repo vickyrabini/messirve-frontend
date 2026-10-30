@@ -7,13 +7,14 @@ export default async function AdminEditServicePage({ params }: { params: Promise
   const { id } = await params
 
   const admin = createAdminClient()
-  const [{ data: service }, { data: categories }, { data: owner }] = await Promise.all([
+  const [{ data: service }, { data: categories }, { data: subcategories }, { data: owner }] = await Promise.all([
     admin
       .from('services')
-      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
+      .select('id, category_id, subcategory_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
       .eq('id', id)
       .single(),
     admin.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),
+    admin.from('subcategories').select('id, category_id, name').order('order').order('name'),
     admin.from('admin_services_view').select('email').eq('id', id).maybeSingle(),
   ])
 
@@ -35,6 +36,7 @@ export default async function AdminEditServicePage({ params }: { params: Promise
         <EditServiceForm
           service={{ ...service, photos: (service.photos as string[]) ?? [] }}
           categories={categories ?? []}
+          subcategories={subcategories ?? []}
           action={adminUpdateService}
           cancelHref="/admin/services"
         />

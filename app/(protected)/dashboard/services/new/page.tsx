@@ -12,9 +12,10 @@ export default async function NewServicePage() {
 
   const supabase = await createClient()
 
-  const [{ data: ownService }, { data: categories }] = await Promise.all([
+  const [{ data: ownService }, { data: categories }, { data: subcategories }] = await Promise.all([
     supabase.from('services').select('id').eq('user_id', profile.id).maybeSingle(),
     supabase.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),
+    supabase.from('subcategories').select('id, category_id, name').order('order').order('name'),
   ])
 
   // Ya tiene un servicio propio — no dejamos crear un segundo por esta vía
@@ -37,7 +38,7 @@ export default async function NewServicePage() {
         <h1 className="mt-4 font-brand uppercase text-2xl text-ink">Publicar un servicio</h1>
         <p className="mt-1 text-sm text-muted">{description}</p>
 
-        <ServiceForm categories={categories ?? []} />
+        <ServiceForm categories={categories ?? []} subcategories={subcategories ?? []} />
       </main>
     </div>
   )
