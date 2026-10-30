@@ -10,15 +10,25 @@ import {
   paymentBadge,
   type PaymentKey,
 } from "./payment-status";
+import { AdminPageContainer } from "../admin-page-container";
 
 const PAYMENT_OPTIONS = PAYMENT_KEYS.map((key) => ({
   value: key,
   label: paymentBadge[key].label,
 }));
 
+// "Sin rubro" sirve para encontrar rápido los servicios a los que falta asignarles uno.
+const RUBRO_OPTIONS = [
+  { value: "with", label: "Con rubro" },
+  { value: "without", label: "Sin rubro" },
+];
+type RubroFilter = "with" | "without";
+const isRubroFilter = (v: string | undefined): v is RubroFilter =>
+  v === "with" || v === "without";
+
 const PAGE_SIZE = 10;
 
-// Fila de public.admin_services_view (supabase/migrations/20261016000000_admin_services_view.sql)
+// Fila de public.admin_services_view (supabase/migrations/20261030000300_admin_services_view_subcategory.sql)
 type AdminServiceRow = {
   id: string;
   name: string;
@@ -29,16 +39,29 @@ type AdminServiceRow = {
   category_emoji: string | null;
   email: string | null;
   payment_key: PaymentKey | null;
+  subcategory_id: string | null;
+  subcategory_name: string | null;
 };
 
 export default async function AdminServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; payment?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    payment?: string;
+    rubro?: string;
+  }>;
 }) {
-  const { page: pageParam, q, payment: paymentParam } = await searchParams;
+  const {
+    page: pageParam,
+    q,
+    payment: paymentParam,
+    rubro: rubroParam,
+  } = await searchParams;
   const query = q?.trim() ?? "";
   const payment = isPaymentKey(paymentParam) ? paymentParam : null;
+  const rubro = isRubroFilter(rubroParam) ? rubroParam : null;
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -52,6 +75,8 @@ export default async function AdminServicesPage({
     .range(from, to);
   if (query) request = request.ilike("email", `%${escapeLike(query)}%`);
   if (payment) request = request.eq("payment_key", payment);
+  if (rubro === "with") request = request.not("subcategory_id", "is", null);
+  if (rubro === "without") request = request.is("subcategory_id", null);
   const { data, count } = await request.returns<AdminServiceRow[]>();
 
   const pageRows = (data ?? []).map((s) => ({
@@ -65,18 +90,19 @@ export default async function AdminServicesPage({
   }));
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
-  const hasFilters = !!query || !!payment;
+  const hasFilters = !!query || !!payment || !!rubro;
 
   const buildHref = (p: number) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (payment) params.set("payment", payment);
+    if (rubro) params.set("rubro", rubro);
     params.set("page", String(p));
     return `/admin/services?${params.toString()}`;
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-10">
+    <AdminPageContainer size="wide">
       <h1 className="font-brand uppercase text-2xl text-ink">
         Gestionar servicios
       </h1>
@@ -87,25 +113,36 @@ export default async function AdminServicesPage({
       <AdminListFilters
         basePath="/admin/services"
         searchPlaceholder="Buscar por email..."
-        selectParam="payment"
-        selectLabel="Filtrar por pago"
-        selectAllLabel="Todos los pagos"
-        options={PAYMENT_OPTIONS}
+        selects={[
+          {
+            param: "payment",
+            label: "Filtrar por pago",
+            allLabel: "Todos los pagos",
+            options: PAYMENT_OPTIONS,
+            initial: payment,
+          },
+          {
+            param: "rubro",
+            label: "Filtrar por rubro",
+            allLabel: "Todos los rubros",
+            options: RUBRO_OPTIONS,
+            initial: rubro,
+          },
+        ]}
         initialQuery={q?.trim() ?? ""}
-        initialSelect={payment}
       />
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full whitespace-nowrap text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
-                <th className="px-5 py-3 font-medium">Nombre</th>
-                <th className="px-5 py-3 font-medium">Categoría</th>
-                <th className="px-5 py-3 font-medium">Creado por</th>
-                <th className="px-5 py-3 font-medium">Pago</th>
-                <th className="px-5 py-3 font-medium">Estado</th>
-                <th className="px-5 py-3 font-medium"></th>
+                <th className="px-4 py-3 font-medium">Nombre</th>
+                <th className="px-4 py-3 font-medium">Categoría</th>
+                <th className="px-4 py-3 font-medium">Creado por</th>
+                <th className="px-4 py-3 font-medium">Pago</th>
+                <th className="px-4 py-3 font-medium">Estado</th>
+                <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody>
@@ -114,16 +151,36 @@ export default async function AdminServicesPage({
                   key={s.id}
                   className="border-b border-gris/20 last:border-0"
                 >
-                  <td className="px-5 py-3 font-medium text-ink">{s.name}</td>
-                  <td className="px-5 py-3 text-muted">
-                    {s.categories
-                      ? `${s.categories.emoji ? `${s.categories.emoji} ` : ""}${s.categories.name}`
-                      : "—"}
+                  <td className="px-4 py-3 font-medium text-ink">
+                    <span className="block max-w-[200px] truncate" title={s.name}>
+                      {s.name}
+                    </span>
                   </td>
-                  <td className="px-5 py-3 text-muted">
-                    {s.email ?? "Admin (panel)"}
+                  <td className="px-4 py-3 text-muted">
+                    <span className="block max-w-[180px] truncate" title={s.categories?.name}>
+                      {s.categories
+                        ? `${s.categories.emoji ? `${s.categories.emoji} ` : ""}${s.categories.name}`
+                        : "—"}
+                    </span>
+                    {s.subcategory_name ? (
+                      <span
+                        className="mt-0.5 block max-w-[180px] truncate text-xs text-ink/70"
+                        title={s.subcategory_name}
+                      >
+                        {s.subcategory_name}
+                      </span>
+                    ) : (
+                      <span className="mt-1 inline-block rounded-full bg-dorado/10 px-2 py-0.5 text-[11px] font-semibold text-dorado-dark">
+                        Sin rubro
+                      </span>
+                    )}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-4 py-3 text-muted">
+                    <span className="block max-w-[200px] truncate" title={s.email ?? undefined}>
+                      {s.email ?? "Admin (panel)"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
                     {s.paymentKey === null ? (
                       <span className="text-muted">—</span>
                     ) : (
@@ -134,7 +191,7 @@ export default async function AdminServicesPage({
                       </span>
                     )}
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         s.is_active
@@ -145,7 +202,7 @@ export default async function AdminServicesPage({
                       {s.is_active ? "Activo" : "Desactivado"}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
                       <Link
                         href={`/admin/services/${s.id}/edit`}
@@ -196,6 +253,6 @@ export default async function AdminServicesPage({
 
         <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
       </div>
-    </div>
+    </AdminPageContainer>
   );
 }

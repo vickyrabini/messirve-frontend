@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
 import { normalizePhone } from '@/lib/normalize-phone'
+import { parseSubcategory } from '@/lib/services/parse-subcategory'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -57,6 +58,11 @@ export async function registerClient(_state: RegisterClientState, formData: Form
   if (!categoryId || !name) {
     return { error: 'La categoría y el nombre de la marca son obligatorios' }
   }
+
+  // Antes del signUp: si el rubro no es válido no queremos crear la cuenta.
+  const subcategoryResult = await parseSubcategory(formData, categoryId, createAdminClient())
+  if ('error' in subcategoryResult) return { error: subcategoryResult.error }
+  const { subcategory_id } = subcategoryResult
 
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
@@ -140,6 +146,7 @@ export async function registerClient(_state: RegisterClientState, formData: Form
 
   const { error: insertError } = await admin.from('services').insert({
     category_id: categoryId,
+    subcategory_id,
     name,
     description,
     address,

@@ -50,6 +50,16 @@ const links = [
       </svg>
     ),
   },
+  {
+    href: '/admin/rubros',
+    label: 'Rubros de categoría',
+    icon: (
+      <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+        <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z" />
+        <circle cx={8} cy={8} r={1.5} />
+      </svg>
+    ),
+  },
 ]
 
 function AdminNav({ open, onClose }: { open: boolean; onClose: () => void }) {

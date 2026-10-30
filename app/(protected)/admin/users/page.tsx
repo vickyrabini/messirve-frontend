@@ -9,6 +9,7 @@ import { ROLES, ROLE_LABEL, isRole } from './roles'
 import { SelectionBar } from './selection-bar'
 import { ADMIN_USER_ROW_COLUMNS, type AdminUserRow } from './users-export-columns'
 import { UsersTable } from './users-table'
+import { AdminPageContainer } from '../admin-page-container'
 
 const PAGE_SIZE = 10
 
@@ -52,8 +53,8 @@ export default async function AdminUsersPage({
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-10">
-      <div className="flex items-center justify-between gap-4">
+    <AdminPageContainer size="wide">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-brand uppercase text-2xl text-ink">Usuarios</h1>
           {/* FULL_NAME_DISABLED: <p className="mt-1 text-sm text-muted">Buscá, editá el rol, el nombre o la contraseña de cualquier usuario</p> */}
@@ -74,12 +75,16 @@ export default async function AdminUsersPage({
         basePath="/admin/users"
         // FULL_NAME_DISABLED: searchPlaceholder="Buscar por nombre o email..."
         searchPlaceholder="Buscar por email..."
-        selectParam="role"
-        selectLabel="Filtrar por rol"
-        selectAllLabel="Todos los roles"
-        options={ROLE_OPTIONS}
+        selects={[
+          {
+            param: 'role',
+            label: 'Filtrar por rol',
+            allLabel: 'Todos los roles',
+            options: ROLE_OPTIONS,
+            initial: role,
+          },
+        ]}
         initialQuery={query}
-        initialSelect={role}
       />
 
       <SelectionBar />
@@ -91,6 +96,6 @@ export default async function AdminUsersPage({
 
         <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
       </div>
-    </div>
+    </AdminPageContainer>
   )
 }

@@ -34,7 +34,7 @@ export default async function ServiceDetailPage({
   const admin = createAdminClient();
   const { data: service } = await admin
     .from("services")
-    .select("*, categories(name, slug, emoji)")
+    .select("*, categories(name, slug, emoji), subcategories(name, slug)")
     .eq("id", id)
     .eq("is_active", true)
     .single<
@@ -152,12 +152,15 @@ export default async function ServiceDetailPage({
             {category?.name && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-celeste/10 px-3 py-1 text-[13px] font-bold text-celeste-deep">
                 {category.emoji} {category.name}
+                {service.subcategories?.name
+                  ? ` · ${service.subcategories.name}`
+                  : ""}
               </span>
             )}
             <h1 className="mt-3 font-brand uppercase text-3xl text-ink sm:text-4xl">
               {service.name}
             </h1>
-            <div className="mt-2 flex flex-wrap flex-col items-start gap-1">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
               <StarRating value={avgRating} size={18} />
               <span className="text-[15px] font-semibold text-ink">
                 {totalRatings > 0 ? avgRating.toFixed(1) : "Sin reseñas aún"}

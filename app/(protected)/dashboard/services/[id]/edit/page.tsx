@@ -13,13 +13,14 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
   }
 
   const supabase = await createClient()
-  const [{ data: service }, { data: categories }] = await Promise.all([
+  const [{ data: service }, { data: categories }, { data: subcategories }] = await Promise.all([
     supabase
       .from('services')
-      .select('id, category_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
+      .select('id, category_id, subcategory_id, name, description, address, city, price_info, phone, website, instagram, photos, latitude, longitude, user_id')
       .eq('id', id)
       .single(),
     supabase.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),
+    supabase.from('subcategories').select('id, category_id, name').order('order').order('name'),
   ])
 
   if (!service || service.user_id !== profile.id) {
@@ -37,6 +38,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
         <EditServiceForm
           service={{ ...service, photos: (service.photos as string[]) ?? [] }}
           categories={categories ?? []}
+          subcategories={subcategories ?? []}
           action={updateService}
           cancelHref="/dashboard"
         />

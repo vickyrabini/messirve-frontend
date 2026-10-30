@@ -6,6 +6,7 @@ import { SubmitButton } from './submit-button'
 import { CopyLinkButton } from './copy-link-button'
 import { DeleteInviteButton } from './delete-invite-button'
 import type { ClientInvite } from '@/types/database'
+import { AdminPageContainer } from '../admin-page-container'
 
 const statusBadge: Record<ClientInvite['status'], { label: string; className: string }> = {
   pending: { label: 'Pendiente', className: 'bg-celeste/10 text-celeste-deep' },
@@ -62,8 +63,8 @@ export default async function AdminFreeAccountsPage() {
   const now = new Date()
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-10">
-      <div className="flex items-center justify-between gap-4">
+    <AdminPageContainer size="wide">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-brand uppercase text-2xl text-ink">Cuentas gratuitas</h1>
           <p className="mt-1 text-sm text-muted">Invitaciones para dar de alta clientes sin pago y gestionar su paso a plan pago</p>
@@ -79,7 +80,7 @@ export default async function AdminFreeAccountsPage() {
       <h2 className="mt-10 text-sm font-bold uppercase tracking-wide text-muted">Invitaciones</h2>
       <div className="mt-3 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full whitespace-nowrap text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-5 py-3 font-medium">Email</th>
@@ -132,7 +133,7 @@ export default async function AdminFreeAccountsPage() {
       <h2 className="mt-10 text-sm font-bold uppercase tracking-wide text-muted">Cuentas gratuitas activas</h2>
       <div className="mt-3 overflow-hidden rounded-2xl border border-gris/30 bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full whitespace-nowrap text-left text-sm">
             <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
               <tr>
                 {/* FULL_NAME_DISABLED: <th className="px-5 py-3 font-medium">Nombre</th> */}
@@ -174,6 +175,6 @@ export default async function AdminFreeAccountsPage() {
         </div>
         {freeClients.length === 0 && <p className="px-5 py-8 text-center text-sm text-muted">No hay cuentas gratuitas activas</p>}
       </div>
-    </div>
+    </AdminPageContainer>
   )
 }

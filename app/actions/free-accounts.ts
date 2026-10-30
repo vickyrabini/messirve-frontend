@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { parseLocation } from '@/lib/parse-location'
 import { normalizePhone } from '@/lib/normalize-phone'
 import { buildInviteLink } from '@/lib/invite-link'
+import { parseSubcategory } from '@/lib/services/parse-subcategory'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -171,6 +172,11 @@ export async function registerFreeClient(
     return { error: 'La categoría y el nombre de la marca son obligatorios' }
   }
 
+  // Antes de createUser: si el rubro no es válido no queremos crear la cuenta.
+  const subcategoryResult = await parseSubcategory(formData, categoryId, admin)
+  if ('error' in subcategoryResult) return { error: subcategoryResult.error }
+  const { subcategory_id } = subcategoryResult
+
   const description = (formData.get('description') as string)?.trim() || null
   const address = (formData.get('address') as string)?.trim() || null
   const location = parseLocation(formData)
@@ -250,6 +256,7 @@ export async function registerFreeClient(
   // la invitación — el servicio queda aprobado y visible de entrada, sin revisión ni pago.
   const { error: insertError } = await admin.from('services').insert({
     category_id: categoryId,
+    subcategory_id,
     name,
     description,
     address,

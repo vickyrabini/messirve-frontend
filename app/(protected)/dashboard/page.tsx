@@ -22,7 +22,7 @@ export default async function DashboardPage({
   const paymentUpdateStatus = paymentUpdate === 'success' ? 'success' : paymentUpdate === 'cancel' ? 'cancel' : null
   const cancellationStatus = cancellation === 'success' ? 'success' : null
 
-  const [{ data: ownService }, { data: categories }, { data: servicesData }, { data: subscription }] = await Promise.all([
+  const [{ data: ownService }, { data: categories }, { data: subcategories }, { data: servicesData }, { data: subscription }] = await Promise.all([
     profile?.role === 'client' || profile?.role === 'user'
       ? supabase
           .from('services')
@@ -30,8 +30,9 @@ export default async function DashboardPage({
           .eq('user_id', user!.id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
-    supabase.from('categories').select('id, name, slug, emoji, created_at').order('order', { ascending: true }),
-    supabase.from('services').select('*, categories(name, slug, emoji)').eq('is_active', true),
+    supabase.from('categories').select('id, name, slug, emoji, order, created_at').order('order', { ascending: true }),
+    supabase.from('subcategories').select('id, category_id, name, slug').order('order').order('name'),
+    supabase.from('services').select('*, categories(name, slug, emoji), subcategories(name, slug)').eq('is_active', true),
     profile?.role === 'client'
       ? supabase.from('subscriptions').select('amount, currency, current_period_end, status').eq('user_id', user!.id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -89,6 +90,7 @@ export default async function DashboardPage({
       isAdmin={profile?.role === 'admin'}
       role={profile?.role ?? 'user'}
       categories={categories ?? []}
+      subcategories={subcategories ?? []}
       exploreServices={exploreServices}
       favoriteServices={favoriteServices}
       reviews={reviews}

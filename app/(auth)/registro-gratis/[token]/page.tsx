@@ -24,7 +24,12 @@ export default async function RegistroGratisPage({ params }: { params: Promise<{
     )
   }
 
-  const { data: categories } = await admin.from('categories').select('id, name, slug, emoji').order('order', { ascending: true })
+  const [{ data: categories }, { data: subcategories }] = await Promise.all([
+    admin.from('categories').select('id, name, slug, emoji').order('order', { ascending: true }),
+    admin.from('subcategories').select('id, category_id, name').order('order').order('name'),
+  ])
 
-  return <FreeRegisterForm token={token} email={invite.email} categories={categories ?? []} />
+  return (
+    <FreeRegisterForm token={token} email={invite.email} categories={categories ?? []} subcategories={subcategories ?? []} />
+  )
 }

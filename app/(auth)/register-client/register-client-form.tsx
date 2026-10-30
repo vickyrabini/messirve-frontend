@@ -10,6 +10,10 @@ import { PhotoCropInput } from '@/components/photo-crop/photo-crop-input'
 import { PHOTO_HELP_TEXT } from '@/lib/crop-image'
 import { uppercaseOnInput } from '@/lib/uppercase-input'
 import type { Category } from '@/types/database'
+import {
+  CategorySubcategoryFields,
+  type SubcategoryOption,
+} from '@/components/service-form/category-subcategory-fields'
 import { PhoneInputField } from '@/components/phone-input-field'
 
 const initialState: RegisterClientState = { error: null }
@@ -21,9 +25,10 @@ const labelClass = 'mb-1.5 block text-[14px] font-semibold text-ink'
 
 type Props = {
   categories: Pick<Category, 'id' | 'name' | 'slug' | 'emoji'>[]
+  subcategories: SubcategoryOption[]
 }
 
-export function RegisterClientForm({ categories }: Props) {
+export function RegisterClientForm({ categories, subcategories }: Props) {
   const [state, formAction, isPending] = useActionState(registerClient, initialState)
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -316,22 +321,12 @@ export function RegisterClientForm({ categories }: Props) {
                       </p>
                     </div>
 
-                    <div>
-                      <label htmlFor="categoryId" className={labelClass}>
-                        Categoría
-                      </label>
-                      <select id="categoryId" name="categoryId" required className={inputClass} defaultValue="">
-                        <option value="" disabled>
-                          Elegí una categoría
-                        </option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.emoji ? `${c.emoji} ` : ''}
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <CategorySubcategoryFields
+                      categories={categories}
+                      subcategories={subcategories}
+                      inputClass={inputClass}
+                      labelClass={labelClass}
+                    />
 
                     <div>
                       <label htmlFor="name" className={labelClass}>

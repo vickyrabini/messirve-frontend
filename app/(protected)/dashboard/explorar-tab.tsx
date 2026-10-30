@@ -4,31 +4,51 @@ import { useMemo, useState } from "react";
 import { ServiceCard } from "@/components/service-card";
 import { getCategoryColor } from "@/lib/category-colors";
 import type { Category, ServiceWithStats } from "@/types/database";
+import { RubroChips, type RubroOption } from "./rubro-chips";
 
 type Props = {
   // FULL_NAME_DISABLED: fullName: string;
   categories: Category[];
+  subcategories: RubroOption[];
   services: ServiceWithStats[];
 };
 
 // FULL_NAME_DISABLED: export function ExplorarTab({ fullName, categories, services }: Props) {
 //   const firstName = fullName.trim().split(" ")[0] || "";
-export function ExplorarTab({ categories, services }: Props) {
+export function ExplorarTab({ categories, subcategories, services }: Props) {
   const [query, setQuery] = useState("");
   const [categorySlug, setCategorySlug] = useState<string | null>(null);
+  const [rubroSlug, setRubroSlug] = useState<string | null>(null);
+
+  const activeCategoryId = categories.find((c) => c.slug === categorySlug)?.id;
+  // Solo rubros que tienen algún servicio publicado (misma regla que /search). Por id y
+  // no por slug: el slug solo es único dentro de su categoría.
+  const usedRubroIds = useMemo(
+    () => new Set(services.map((s) => s.subcategory_id).filter(Boolean)),
+    [services],
+  );
+  const rubros = subcategories.filter(
+    (r) => r.category_id === activeCategoryId && usedRubroIds.has(r.id),
+  );
+
+  function selectCategory(slug: string | null) {
+    setCategorySlug(slug);
+    setRubroSlug(null);
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return services.filter((s) => {
       const matchesCategory =
         !categorySlug || s.categories?.slug === categorySlug;
+      const matchesRubro = !rubroSlug || s.subcategories?.slug === rubroSlug;
       const matchesQuery =
         !q ||
         s.name.toLowerCase().includes(q) ||
         s.description?.toLowerCase().includes(q);
-      return matchesCategory && matchesQuery;
+      return matchesCategory && matchesRubro && matchesQuery;
     });
-  }, [services, query, categorySlug]);
+  }, [services, query, categorySlug, rubroSlug]);
 
   return (
     <div>
@@ -66,10 +86,11 @@ export function ExplorarTab({ categories, services }: Props) {
         </div>
       </div>
       {/* Chips de categoría */}
-      <div className="mb-8 flex flex-wrap gap-3">
+      {/* Mobile: una fila con scroll horizontal; desde sm: chips en varias líneas */}
+      <div className="-mx-5 mb-8 flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden [&>button]:shrink-0 [&>button]:whitespace-nowrap">
         <button
           type="button"
-          onClick={() => setCategorySlug(null)}
+          onClick={() => selectCategory(null)}
           className={`rounded-full px-4 py-2 text-[14px] font-semibold transition-colors ${
             categorySlug === null
               ? "bg-celeste-deep text-white"
@@ -86,7 +107,7 @@ export function ExplorarTab({ categories, services }: Props) {
               key={c.id}
               type="button"
               onClick={() =>
-                setCategorySlug(c.slug === categorySlug ? null : c.slug)
+                selectCategory(c.slug === categorySlug ? null : c.slug)
               }
               className={`rounded-full px-4 py-2 text-[14px] font-semibold transition-all ${color.bg} ${color.text} ${color.hover} ${
                 active ? "ring-2 ring-offset-2 ring-ink" : ""
@@ -97,6 +118,9 @@ export function ExplorarTab({ categories, services }: Props) {
           );
         })}
       </div>
+      {rubros.length > 0 && (
+        <RubroChips rubros={rubros} activeSlug={rubroSlug} onChange={setRubroSlug} />
+      )}
       <div className="mb-5 flex items-baseline justify-between">
         <h3 className="font-brand text-xl text-ink uppercase">
           Recomendados para vos

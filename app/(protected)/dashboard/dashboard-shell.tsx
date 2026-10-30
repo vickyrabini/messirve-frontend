@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {logout} from "@/app/actions/auth";
 import {ExplorarTab} from "./explorar-tab";
+import type { RubroOption } from "./rubro-chips";
 import {FavoritosTab} from "./favoritos-tab";
 import {ResenasTab, type ReviewItem} from "./resenas-tab";
 import {SuscripcionTab} from "./suscripcion-tab";
@@ -119,6 +120,7 @@ type Props = {
   isAdmin: boolean;
   role: "admin" | "client" | "user";
   categories: Category[];
+  subcategories: RubroOption[];
   exploreServices: ServiceWithStats[];
   favoriteServices: ServiceWithStats[];
   reviews: ReviewItem[];
@@ -147,6 +149,7 @@ export function DashboardShell({
   isAdmin,
   role,
   categories,
+  subcategories,
   exploreServices,
   favoriteServices,
   reviews,
@@ -320,8 +323,9 @@ export function DashboardShell({
 
       {/* MAIN */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="z-10 flex h-[78px] shrink-0 items-center gap-3 justify-between border-b border-gris/40 bg-cream/90 px-5 sm:px-8 backdrop-blur">
-          <div className="flex items-center gap-3">
+        <header className="z-10 flex h-[78px] shrink-0 items-center border-b border-gris/40 bg-cream/90 backdrop-blur">
+          {/* Mismo ancho que el contenido para que el título quede alineado con él */}
+          <div className="mx-auto flex w-full max-w-[1240px] items-center gap-3 px-5 sm:px-8">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -345,14 +349,14 @@ export function DashboardShell({
           </div>
         </header>
 
-        <div
-          className="flex-1 overflow-y-auto px-5 py-9 sm:px-8"
-          style={{ maxWidth: "1240px" }}
-        >
+        {/* El scroll ocupa todo el ancho (barra pegada al borde); el contenido se centra adentro */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1240px] px-5 py-9 sm:px-8">
           {tab === "explorar" && (
             <ExplorarTab
               // FULL_NAME_DISABLED: fullName={fullName}
               categories={categories}
+              subcategories={subcategories}
               services={exploreServices}
             />
           )}
@@ -377,6 +381,7 @@ export function DashboardShell({
               hasActiveSubscription={!!subscription}
             />
           )}
+          </div>
         </div>
       </main>
     </div>

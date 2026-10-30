@@ -13,7 +13,7 @@ type UsersTableProps = {
 export function UsersTable({ users, callerId }: UsersTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
+      <table className="w-full whitespace-nowrap text-left text-sm">
         <thead className="border-b border-gris/30 bg-cream/60 text-xs uppercase tracking-wide text-muted">
           <tr>
             <th className="w-10 px-5 py-3">
