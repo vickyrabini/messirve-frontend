@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { createClientUser, type CreateUserState } from '@/app/actions/admin'
+import { AdminPageContainer } from '../../admin-page-container'
 
 const initialState: CreateUserState = { error: null }
 
@@ -15,7 +16,7 @@ export default function NewClientUserPage() {
   const [state, formAction, isPending] = useActionState(createClientUser, initialState)
 
   return (
-    <div className="mx-auto max-w-md px-8 py-10">
+    <AdminPageContainer size="narrow">
       <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
         <span>←</span> Volver a usuarios
       </Link>
@@ -84,6 +85,6 @@ export default function NewClientUserPage() {
             {isPending ? 'Creando...' : 'Crear usuario'}
           </button>
         </form>
-    </div>
+    </AdminPageContainer>
   )
 }

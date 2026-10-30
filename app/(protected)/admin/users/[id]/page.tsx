@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { EditUserForm } from './edit-user-form'
+import { AdminPageContainer } from '../../admin-page-container'
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,7 +19,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="mx-auto max-w-md px-8 py-10">
+    <AdminPageContainer size="narrow">
       <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
         <span>←</span> Volver a usuarios
       </Link>
@@ -33,6 +34,6 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         // FULL_NAME_DISABLED: fullName={profile.full_name ?? ''}
         role={profile.role}
       />
-    </div>
+    </AdminPageContainer>
   )
 }

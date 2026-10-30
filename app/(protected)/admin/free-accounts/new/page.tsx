@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { createFreeAccountInvite, type CreateInviteState } from '@/app/actions/free-accounts'
 import InviteLinkResult from '@/components/invite-link-result'
+import { AdminPageContainer } from '../../admin-page-container'
 
 const initialState: CreateInviteState = { error: null }
 
@@ -17,7 +18,7 @@ export default function NewFreeAccountInvitePage() {
   const isCreated = Boolean(state?.success && state.link)
 
   return (
-    <div className="mx-auto max-w-md px-8 py-10">
+    <AdminPageContainer size="narrow">
       <Link href="/admin/free-accounts" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink">
         <span>←</span> Volver a cuentas gratuitas
       </Link>
@@ -69,6 +70,6 @@ export default function NewFreeAccountInvitePage() {
           </Link>
         )}
       </form>
-    </div>
+    </AdminPageContainer>
   )
 }
