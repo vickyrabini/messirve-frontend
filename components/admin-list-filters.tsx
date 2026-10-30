@@ -9,52 +9,67 @@ const filterClass =
 
 export type AdminListFilterOption = { value: string; label: string };
 
+export type AdminListSelect = {
+  param: string;
+  label: string;
+  allLabel: string;
+  options: AdminListFilterOption[];
+  initial: string | null;
+};
+
 type Props = {
   basePath: string;
   searchPlaceholder: string;
-  selectParam: string;
-  selectLabel: string;
-  selectAllLabel: string;
-  options: AdminListFilterOption[];
+  selects: AdminListSelect[];
   initialQuery: string;
-  initialSelect: string | null;
 };
+
+type SelectValues = Record<string, string>;
 
 export function AdminListFilters({
   basePath,
   searchPlaceholder,
-  selectParam,
-  selectLabel,
-  selectAllLabel,
-  options,
+  selects,
   initialQuery,
-  initialSelect,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(initialQuery);
-  const [selected, setSelected] = useState(initialSelect ?? "");
+  const [selected, setSelected] = useState<SelectValues>(() =>
+    Object.fromEntries(selects.map((s) => [s.param, s.initial ?? ""])),
+  );
   const debouncedQuery = useDebouncedValue(query.trim(), 300);
 
   // Sin `page`: cada cambio de filtro vuelve a la página 1.
-  const applyFilters = (q: string, s: string) => {
+  const applyFilters = (q: string, values: SelectValues) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
-    if (s) params.set(selectParam, s);
+    for (const [param, value] of Object.entries(values)) {
+      if (value) params.set(param, value);
+    }
     const qs = params.toString();
     startTransition(() => router.replace(qs ? `${basePath}?${qs}` : basePath));
   };
 
   useEffect(() => {
     if (debouncedQuery !== initialQuery) applyFilters(debouncedQuery, selected);
-    // Solo reacciona al texto ya "asentado"; el select aplica por su cuenta.
+    // Solo reacciona al texto ya "asentado"; los selects aplican por su cuenta.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 
+  const changeSelect = (param: string, value: string) => {
+    const next = { ...selected, [param]: value };
+    setSelected(next);
+    applyFilters(query.trim(), next);
+  };
+
+  const hasFilters = !!query || Object.values(selected).some(Boolean);
+
   const clearFilters = () => {
+    const empty = Object.fromEntries(selects.map((s) => [s.param, ""]));
     setQuery("");
-    setSelected("");
-    applyFilters("", "");
+    setSelected(empty);
+    applyFilters("", empty);
   };
 
   return (
@@ -74,23 +89,23 @@ export function AdminListFilters({
         aria-label={searchPlaceholder.replace(/\.+$/, "")}
         className={`${filterClass} w-full max-w-sm`}
       />
-      <select
-        value={selected}
-        onChange={(e) => {
-          setSelected(e.target.value);
-          applyFilters(query.trim(), e.target.value);
-        }}
-        aria-label={selectLabel}
-        className={`${filterClass} bg-white`}
-      >
-        <option value="">{selectAllLabel}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {(query || selected) && (
+      {selects.map((s) => (
+        <select
+          key={s.param}
+          value={selected[s.param] ?? ""}
+          onChange={(e) => changeSelect(s.param, e.target.value)}
+          aria-label={s.label}
+          className={`${filterClass} bg-white`}
+        >
+          <option value="">{s.allLabel}</option>
+          {s.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ))}
+      {hasFilters && (
         <button
           type="button"
           onClick={clearFilters}
