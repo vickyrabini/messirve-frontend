@@ -65,6 +65,9 @@ export function ServiceCard({ service }: Props) {
             <span className="text-[11px]">{category.emoji}</span>
             <span className="text-[10px] font-bold tracking-wide text-ink">
               {category.name}
+              {service.subcategories?.name
+                ? ` · ${service.subcategories.name}`
+                : ""}
             </span>
           </div>
         )}

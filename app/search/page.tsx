@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ServiceCard } from "@/components/service-card";
 import { Pagination } from "@/components/pagination";
 import { AuthNavActions } from "@/components/auth-nav-actions";
+import { RubroFilterList } from "./rubro-filter-list";
+import { MobileFilterChips } from "./mobile-filter-chips";
 import type { Category, ServiceWithStats } from "@/types/database";
 
 const PAGE_SIZE = 12;
@@ -18,9 +20,14 @@ function sanitizeForFilter(value: string) {
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; categoria?: string; page?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    categoria?: string;
+    rubro?: string;
+    page?: string;
+  }>;
 }) {
-  const { q, categoria, page: pageParam } = await searchParams;
+  const { q, categoria, rubro, page: pageParam } = await searchParams;
   const query = q?.trim() ?? "";
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
@@ -32,18 +39,51 @@ export default async function SearchPage({
   const admin = createAdminClient();
   const { data: categoriesData } = await admin
     .from("categories")
-    .select("id, name, slug, emoji, created_at")
+    .select("id, name, slug, emoji, order, created_at")
     .order("order", { ascending: true });
   const categories: Category[] = categoriesData ?? [];
   const activeCategory = categories.find((c) => c.slug === categoria);
 
+  // Rubros solo de la categoría activa; el rubro de la URL se ignora si no pertenece a ella.
+  const [{ data: rubrosData }, { data: categoryServicesData }] = activeCategory
+    ? await Promise.all([
+        admin
+          .from("subcategories")
+          .select("id, name, slug")
+          .eq("category_id", activeCategory.id)
+          .order("order")
+          .order("name"),
+        // Conteo por rubro en UNA consulta, agrupado en memoria (la lista puede ser larga).
+        admin
+          .from("services")
+          .select("subcategory_id")
+          .eq("is_active", true)
+          .eq("category_id", activeCategory.id),
+      ])
+    : [{ data: [] }, { data: [] }];
+  const rubroCounts = new Map<string, number>();
+  for (const s of categoryServicesData ?? []) {
+    if (s.subcategory_id)
+      rubroCounts.set(s.subcategory_id, (rubroCounts.get(s.subcategory_id) ?? 0) + 1);
+  }
+  const activeRubro = (rubrosData ?? []).find((r) => r.slug === rubro);
+  // Solo rubros con servicios publicados (la lista completa tiene cientos, casi todos
+  // vacíos); el activo se mantiene aunque quede en 0 para que el filtro siga visible.
+  const rubros = (rubrosData ?? []).filter(
+    (r) => (rubroCounts.get(r.id) ?? 0) > 0 || r.id === activeRubro?.id,
+  );
+
   let servicesQuery = admin
     .from("services")
-    .select("*, categories(name, slug, emoji)", { count: "exact" })
+    .select("*, categories(name, slug, emoji), subcategories(name, slug)", {
+      count: "exact",
+    })
     .eq("is_active", true);
 
   if (activeCategory)
     servicesQuery = servicesQuery.eq("category_id", activeCategory.id);
+  if (activeRubro)
+    servicesQuery = servicesQuery.eq("subcategory_id", activeRubro.id);
 
   const safeQuery = sanitizeForFilter(query);
   if (safeQuery)
@@ -109,11 +149,13 @@ export default async function SearchPage({
   const buildHref = (params: {
     q?: string;
     categoria?: string;
+    rubro?: string;
     page?: number;
   }) => {
     const usp = new URLSearchParams();
     if (params.q) usp.set("q", params.q);
     if (params.categoria) usp.set("categoria", params.categoria);
+    if (params.categoria && params.rubro) usp.set("rubro", params.rubro);
     if (params.page && params.page > 1) usp.set("page", String(params.page));
     const qs = usp.toString();
     return qs ? `/search?${qs}` : "/search";
@@ -168,6 +210,9 @@ export default async function SearchPage({
                 {categoria && (
                   <input type="hidden" name="categoria" value={categoria} />
                 )}
+                {activeRubro && (
+                  <input type="hidden" name="rubro" value={activeRubro.slug} />
+                )}
                 <label
                   htmlFor="q"
                   className="text-[14px] font-semibold text-ink"
@@ -204,14 +249,15 @@ export default async function SearchPage({
                 </button>
               </form>
 
-              <div className="mt-7 border-t border-gris/30 pt-6">
+              {/* En mobile los filtros van como chips arriba de los resultados (MobileFilterChips) */}
+              <div className="mt-7 hidden border-t border-gris/30 pt-6 lg:block">
                 <p className="text-[13px] font-bold uppercase tracking-wide text-muted">
                   Categorías
                 </p>
                 <nav className="mt-3 flex flex-col gap-1">
                   <Link
                     href={buildHref({ q: query })}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
+                    className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
                       !categoria
                         ? "bg-celeste/10 text-celeste-deep"
                         : "text-ink hover:bg-cream"
@@ -223,20 +269,32 @@ export default async function SearchPage({
                     </span>
                   </Link>
                   {categories.map((c) => (
-                    <Link
-                      key={c.id}
-                      href={buildHref({ q: query, categoria: c.slug })}
-                      className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
-                        categoria === c.slug
-                          ? "bg-celeste/10 text-celeste-deep"
-                          : "text-ink hover:bg-cream"
-                      }`}
-                    >
-                      <span>{c.name}</span>
-                      <span className="text-[13px] font-bold text-muted">
-                        {categoryCounts.get(c.slug) ?? 0}
-                      </span>
-                    </Link>
+                    <div key={c.id}>
+                      <Link
+                        href={buildHref({ q: query, categoria: c.slug })}
+                        className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors ${
+                          categoria === c.slug
+                            ? "bg-celeste/10 text-celeste-deep"
+                            : "text-ink hover:bg-cream"
+                        }`}
+                      >
+                        <span className="min-w-0">{c.name}</span>
+                        <span className="shrink-0 text-[13px] font-bold text-muted">
+                          {categoryCounts.get(c.slug) ?? 0}
+                        </span>
+                      </Link>
+                      {activeCategory?.id === c.id && rubros.length > 0 && (
+                        <RubroFilterList
+                          rubros={rubros}
+                          counts={rubroCounts}
+                          activeRubro={activeRubro?.slug}
+                          totalInCategory={categoryCounts.get(c.slug) ?? 0}
+                          buildRubroHref={(r) =>
+                            buildHref({ q: query, categoria: c.slug, rubro: r })
+                          }
+                        />
+                      )}
+                    </div>
                   ))}
                 </nav>
               </div>
@@ -244,12 +302,28 @@ export default async function SearchPage({
           </aside>
 
           {/* RESULTS */}
-          <div>
-            <p className="text-[15px] text-muted">
+          <div className="min-w-0">
+            <MobileFilterChips
+              categories={categories}
+              activeCategory={activeCategory?.slug}
+              rubros={rubros}
+              activeRubro={activeRubro?.slug}
+              buildCategoryHref={(c) => buildHref({ q: query, categoria: c })}
+              buildRubroHref={(r) =>
+                buildHref({ q: query, categoria: activeCategory?.slug, rubro: r })
+              }
+            />
+            <p className="mt-4 text-[15px] text-muted lg:mt-0">
               {activeCategory ? (
                 <>
                   {" "}
                   en <strong className="text-ink">{activeCategory.name}</strong>
+                  {activeRubro ? (
+                    <>
+                      {" "}
+                      › <strong className="text-ink">{activeRubro.name}</strong>
+                    </>
+                  ) : null}
                 </>
               ) : null}
               {query ? (
@@ -282,7 +356,12 @@ export default async function SearchPage({
                     page={page}
                     totalPages={totalPages}
                     buildHref={(p) =>
-                      buildHref({ q: query, categoria, page: p })
+                      buildHref({
+                        q: query,
+                        categoria,
+                        rubro: activeRubro?.slug,
+                        page: p,
+                      })
                     }
                   />
                 </div>
@@ -291,15 +370,17 @@ export default async function SearchPage({
           </div>
         </div>
 
-        <p className="mt-12 text-center text-[14px] text-muted">
-          <Link
-            href="/login"
-            className="font-semibold text-celeste-deep hover:underline"
-          >
-            Iniciá sesión
-          </Link>{" "}
-          para guardar favoritos y dejar reseñas.
-        </p>
+        {!user && (
+          <p className="mt-12 text-center text-[14px] text-muted">
+            <Link
+              href="/login"
+              className="font-semibold text-celeste-deep hover:underline"
+            >
+              Iniciá sesión
+            </Link>{" "}
+            para guardar favoritos y dejar reseñas.
+          </p>
+        )}
       </main>
     </div>
   );
